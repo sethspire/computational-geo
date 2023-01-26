@@ -1,0 +1,48 @@
+:root {
+    --ff-nav: Anton, impact, sans-serif;
+    --ff-content: Verdana, Geneva, Tahoma, arial, sans-serif;
+
+    --clr-background-dark: #0f7a79;
+    --clr-background-medium: #5dfaff;
+
+    --clr-accent-light: #ffffff;
+    --clr-accent-medium: #c2c2c2;
+    --clr-accent-dark: #000000;
+}
+
+.light-background {
+    background-color: var(--clr-background-medium);
+}
+.dark-background {
+    background-color: var(--clr-background-dark);
+}
+
+nav {
+    font-weight: bold;
+}
+.nav-item {
+    margin: 0 1em;
+}
+.nav-link {
+    color: var(--clr-accent-light);
+}
+.nav-link:hover {
+    color: var(--clr-accent-medium);
+}
+.nav-link:focus {
+    color: var(--clr-accent-medium);
+}
+.navbar-nav {
+    margin-left: auto;
+}
+.navbar-toggler {
+    background-color: transparent;
+    border: 1px solid var(--clr-accent-light);
+    color: var(--clr-accent-light);
+    transition: box-shadow .15s ease-in-out, border .15s ease-in-out, color .15s ease-in-out;
+}
+.navbar-toggler:focus, .navbar-toggler:hover {
+    border: 1px solid var(--clr-accent-medium);
+    box-shadow: 0 0 1px 0.15em var(--clr-accent-medium);
+    color: var(--clr-accent-medium);
+}
