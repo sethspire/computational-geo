@@ -3,11 +3,18 @@
     --ff-content: Verdana, Geneva, Tahoma, arial, sans-serif;
 
     --clr-background-dark: #0e6362;
-    --clr-background-medium: #5dfaff;
+    --clr-background-medium: #84c9bd;
 
     --clr-accent-light: #ffffff;
     --clr-accent-medium: #c2c2c2;
-    --clr-accent-dark: #000000;
+    --clr-accent-dark: #4d4d4d;
+}
+
+html, body {
+    margin: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .light-background {

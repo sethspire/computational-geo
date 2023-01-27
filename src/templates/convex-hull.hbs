@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+
+<head>
+    {{>head}}
+    <link rel='stylesheet' href='/css/visualizer.css' />
+    <script defer src="/js/convex-hull.js"></script>
+</head>
+
+<body>
+    {{>navbar}}
+
+    <main>
+        <div id="side-panel">
+            <button onclick="resizeSVG()"> RESIZE GRAPH</button>
+        </div>
+        <div id="graph-area"></div>
+    </main>
+</body>

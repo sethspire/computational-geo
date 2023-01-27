@@ -2,8 +2,9 @@ const express = require('express')
 const path = require('path')
 const hbs = require('hbs')
 
-const indexRouter = require('./routers/index')
-const _404Router = require('./routers/404')
+const index_router = require('./routers/index')
+const convexHull_router = require('./routers/convex-hull')
+const _404_router = require('./routers/404')
 
 const app = express()
 
@@ -18,8 +19,9 @@ app.set('views', viewsPath)
 const partialsPath = path.join(__dirname, "./templates/partials")
 hbs.registerPartials(partialsPath)
 
-app.use(indexRouter)
-app.use(_404Router)
+app.use(index_router)
+app.use(convexHull_router)
+app.use(_404_router)
 
 const port = process.env.PORT || 3000
 
