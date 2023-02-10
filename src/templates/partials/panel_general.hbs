@@ -1,0 +1,23 @@
+<link rel='stylesheet' href='/css/visualizer.css' />
+<script defer src="/js/visualizer.js"></script>
+
+<div id="side-panel">
+    <div id="graph-edit-tools">
+        <button class="panel-btn" title="Resize Graph to Fit Available Area" onclick="resizeSVG()">RESIZE GRAPH</button>
+
+        <button class="panel-btn" title="Toggle Full-Screen Mode" onclick="fullscreenToggle()">FULL SCREEN</button>
+
+        <button class="panel-btn" title="Clear All Points" onclick="clearAll()">CLEAR ALL</button>
+
+        <div class="panel-selector">
+            <abbr title="Add Point">
+                <input type="radio" name="graphEdit" id="addPoint" value="addPoint" onclick="toggleGraphEdit()" checked>
+                <label class="selector-left" for="addPoint">✎</label>
+            </abbr>
+            <abbr title="Remove Point">
+                <input type="radio" name="graphEdit" id="removePoint" value="removePoint" onclick="toggleGraphEdit()">
+                <label class="selector-right" for="removePoint">╳</label>
+            </abbr>
+        </div>
+    </div>
+</div>

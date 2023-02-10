@@ -2,16 +2,19 @@
     --panel-width: 10em;
 }
 
+
+/*
+-------
+GENERAL
+-------
+*/
+html {
+    background-color: black;
+}
 main  {
     height: 100%;
     display: flex;
     flex-direction: row;
-}
-#side-panel {
-    flex-shrink: 0;
-    width: var(--panel-width);
-    height: 100%;
-    background-color: var(--clr-background-medium);
 }
 #graph-area {
     width: calc(100% - var(--panel-width));
@@ -19,8 +22,84 @@ main  {
     background-color: black;
 }
 
-#test-width {
-    background-color: purple;
-    width: 2000px;
-    height: 2000px;
+
+/*
+----------
+SIDE PANEL
+----------
+*/
+#side-panel {
+    flex-shrink: 0;
+    width: var(--panel-width);
+    height: 100%;
+    background-color: var(--clr-background-medium);
+}
+/* panel buttons */
+.panel-btn {
+    display: block;
+    border: 0.125em solid var(--clr-background-dark);
+    border-radius: 2em;
+    margin: 0.5em;
+    background-color: transparent;
+    font-weight: bold;
+}
+.panel-btn:hover {
+    background-color: var(--clr-background-med-dark);
+}
+.panel-btn:active {
+    box-shadow: 0 0 0.25em 0.125em var(--clr-background-dark);
+    background-color: var(--clr-background-dark);
+    color: var(--clr-background-medium);
+}
+.panel-btn-activated {
+    background-color: var(--clr-background-dark);
+    color: var(--clr-background-medium);
+}
+/* panel selectors */
+.selector-left {
+    border-radius: 2em 0 0 2em;
+}
+.selector-right {
+    border-radius: 0 2em 2em 0;
+}
+.panel-selector {
+    display: flex;
+    margin: 0.5em;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.panel-selector input[type="radio"] {
+    display: none;
+}      
+.panel-selector label {
+    color: #00000041;
+    padding: 4px 11px;
+    font-family: Arial;
+    font-size: 1em;
+    cursor: pointer;
+    font-weight: bold;
+    border: 0.125em solid var(--clr-background-dark);
+    background-color: transparent;
+}      
+.panel-selector input[type="radio"]:checked+label {
+    background-color: var(--clr-background-dark);
+    color: var(--clr-background-medium);
+}
+
+/*
+----------
+SVG
+----------
+*/
+svg {
+    cursor: crosshair;
+}
+.svg-point-add:hover {
+    cursor: not-allowed;
+}
+.svg-point-remove:hover {
+    cursor: not-allowed;
+    stroke-opacity: 0.3;
+}
+.svg-void-border:hover {
+    cursor: not-allowed;
 }

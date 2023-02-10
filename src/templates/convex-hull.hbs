@@ -3,17 +3,14 @@
 
 <head>
     {{>head}}
-    <link rel='stylesheet' href='/css/visualizer.css' />
-    <script defer src="/js/convex-hull.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
 </head>
 
 <body>
     {{>navbar}}
 
     <main>
-        <div id="side-panel">
-            <button onclick="resizeSVG()"> RESIZE GRAPH</button>
-        </div>
+        {{>panel_general}}
         <div id="graph-area"></div>
     </main>
 </body>
