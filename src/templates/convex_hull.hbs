@@ -4,13 +4,14 @@
 <head>
     {{>head}}
      <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
+     <script defer src="/js/convexHull.js"></script>
 </head>
 
 <body>
     {{>navbar}}
 
     <main>
-        {{>panel_general subpanel="null"}}
+        {{>panel_general algorithms="convex_hull_algs"}}
         <div id="graph-area"></div>
     </main>
 </body>
