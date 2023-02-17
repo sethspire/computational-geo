@@ -142,8 +142,13 @@ function toggleGraphEdit() {
             point.removeClass("svg-point-add")
             point.attr("stroke-width", pointSize*2)
         })
-    }
-    if (selectedBtn === "addPoint") {
+    } else if (selectedBtn === "addPoint") {
+        pointsList.each(function(point) {
+            point.addClass("svg-point-add")
+            point.removeClass("svg-point-remove")
+            point.attr("stroke-width", pointSize*4)
+        })
+    } else if (selectedBtn === "lockGraph") {
         pointsList.each(function(point) {
             point.addClass("svg-point-add")
             point.removeClass("svg-point-remove")

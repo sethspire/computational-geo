@@ -16,8 +16,20 @@
             </abbr>
             <abbr title="Remove Point">
                 <input type="radio" name="graphEdit" id="removePoint" value="removePoint" onclick="toggleGraphEdit()">
-                <label class="selector-right" for="removePoint">╳</label>
+                <label for="removePoint">╳</label>
+            </abbr>
+            <abbr title="Lock Points - Clicks Do Nothing">
+                <input type="radio" name="graphEdit" id="lockGraph" value="lockGraph"  onclick="toggleGraphEdit()">
+                <label class="selector-right" for="lockGraph">␀</label>
             </abbr>
         </div>
+
+        <div>
+            <button class="panel-btn media-control" title="Previous State"><img src="images/media control/previous.png"></button>
+            <button class="panel-btn media-control" title="Play/Pause"><img src="images/media control/pause-play.png"></button>
+            <button class="panel-btn media-control" title="Next State"><img src="images/media control/next.png"></button>
+        </div>
+
+        {{!-- {{> (lookup . 'subpanel')}} --}}
     </div>
 </div>
