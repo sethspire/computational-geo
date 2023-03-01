@@ -20,14 +20,17 @@
             </abbr>
             <abbr title="Lock Points - Clicks Do Nothing">
                 <input type="radio" name="graphEdit" id="lockGraph" value="lockGraph"  onclick="toggleGraphEdit()">
-                <label class="selector-right" for="lockGraph">␀</label>
+                <label class="selector-right" for="lockGraph">&#128274</label>
             </abbr>
         </div>
 
-        <div>
-            <button class="panel-btn media-control" title="Previous State"><img src="images/media control/previous.png"></button>
-            <button class="panel-btn media-control" title="Play/Pause"><img src="images/media control/pause-play.png"></button>
-            <button class="panel-btn media-control" title="Next State"><img src="images/media control/next.png"></button>
+        <div id="media-panel">
+            <button id="media-to-start" class="panel-btn media-control" title="To Start"><img src="images/media control/to-start.png"></button>
+            <button id="media-previous" class="panel-btn media-control" title="Previous State"><img src="images/media control/previous.png"></button>
+            <button id="media-playpause" class="panel-btn media-control" title="Play/Pause"><img src="images/media control/pause-play.png"></button>
+            <button id="media-next" class="panel-btn media-control" title="Next State"><img src="images/media control/next.png"></button>
+            <button id="media-to-end" class="panel-btn media-control" title="To End"><img src="images/media control/to-end.png"></button>
+            <progress id="media-progress" value="-1" max="-1"></progress>
         </div>
 
         {{> (lookup . 'algorithms')}}

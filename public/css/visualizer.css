@@ -55,14 +55,21 @@ SIDE PANEL
     background-color: var(--clr-background-dark);
     color: var(--clr-background-medium);
 }
+#media-panel {
+    margin-left: 0.5em;
+}
 .media-control {
     display: inline-block;
-    margin-right: -0.5em;
     border: none;
+    margin: 0;
+    padding: 0.0625em 0.29em;
+}
+#media-progress {
+    width: calc(var(--panel-width) - 1em);
 }
 button > img {
-    height: 1.25em;
-    width: 1.25em;
+    height: 1.2em;
+    width: 1em;
     padding-bottom: 0.25em;
 }
 /* panel selectors */

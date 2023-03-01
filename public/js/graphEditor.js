@@ -108,18 +108,21 @@ function addPoint(event) {
         const x = event.offsetX 
         const y = event.offsetY 
 
-        points.circle(pointSize)
+        newPoint = points.circle(pointSize)
             .center(x, y)
-            .fill("black")
             .attr({
+                "fill": "black",
                 "stroke-width": pointSize*4,
                 "stroke": "red",
                 "stroke-opacity": 0
             })
             .addClass("svg-point-add")
-            .attr("id", 'p(' + x + ',' + y + ')')
+            .attr("id", `p${x}-${y}`)
+        pointInitialState = JSON.stringify(newPoint.attr())
+        newPoint.attr("data-init-state", pointInitialState)
 
         console.log("New Point: " + x + "x, " + y + "y")
+        resetStates()
     } else {
         console.log("Cannot place new point close to previous points nor close to edge")
     }
@@ -132,6 +135,7 @@ function deletePoint() {
     
     if (hoveredCircle) {
         hoveredCircle.remove()
+        resetStates()
     } else {
         console.log("There is no point to remove at this location")
     }
@@ -181,9 +185,33 @@ function clearAll() {
     confirmClear = confirm("Are you sure you want to clear all?")
     
     if (confirmClear) {
-        pointsList = canvas.find('circle')
+        pointsList = points.find('circle')
         pointsList.remove()
+
+        edgesList = edges.find('line')
+        edgesList.remove()
     }
+}
+
+// FUNCTION: reset to initial state
+function resetStates() {
+    // reset points to initial state
+    pointsList = points.find('circle')
+    pointsList.forEach(point => {
+        initState = JSON.parse(point.attr("data-init-state"))
+        curClass = point.attr("class")
+        curStrokeWidth = point.attr("stroke-width")
+        point.attr(initState)
+        point.attr("class", curClass)
+        point.attr("stroke-width", curStrokeWidth)
+    })
+
+    // remove edges
+    edgesList = edges.find('line')
+    edgesList.remove()
+
+    // re-initialize state list
+    initStateList()
 }
 
 // immediately run to create initial SVG
