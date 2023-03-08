@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+
+<head>
+    {{>head}}
+     <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
+     <script defer src="/js/visualizer.js"></script>
+     <script defer src="/js/lineSegmentIntersection.js"></script>
+</head>
+
+<body>
+    {{>navbar}}
+
+    <main>
+        {{>panel_general algorithms="line_segment_intersection_algs"}}
+        <div id="graph-area"></div>
+    </main>
+</body>

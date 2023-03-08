@@ -1,3 +1,4 @@
+const inputType = "point"
 let stateList = {
     "curIteration": -1,
     "numIterations": -1,

@@ -10,6 +10,7 @@ let canvas = null
 let points = null
 let edges = null
 let boundary = null
+let temp = null
 
 // FUNCTION: resize svg area
 function resizeSVG() {
@@ -32,6 +33,7 @@ function resizeSVG() {
     boundary = canvas.group().attr("id", "boundary")
     edges = canvas.group().attr("id", "edges")
     points = canvas.group().attr("id", "points")
+    temp = canvas.group().attr("id", "temp")
 
     // add rectangles around edges for void area where cannot place points
     boundary.rect(voidSize+1, svg_height+1)
@@ -123,8 +125,11 @@ function addPoint(event) {
 
         console.log("New Point: " + x + "x, " + y + "y")
         resetStates()
+
+        return newPoint
     } else {
         console.log("Cannot place new point close to previous points nor close to edge")
+        return null
     }
 }
 
@@ -141,41 +146,131 @@ function deletePoint() {
     }
 }
 
+// FUNCTION: add first point of segment
+function addSegmentStart(event) {
+    startPoint = addPoint(event)
+    if (startPoint) {
+        // move new point into temp
+        startPoint.putIn(temp)
+
+        // add temp dashed line showing where segment is
+        temp.line()
+            .attr({
+                "x1": event.offsetX,
+                "y1": event.offsetY,
+                "x2": event.offsetX,
+                "y2": event.offsetY,
+                "stroke": "black",
+                "stroke-dasharray": "5, 5"
+            })
+
+        // add event listener moving temp line
+        canvas.on('mousemove', function(event) {
+            tempEdge = temp.findOne("line")
+            tempEdge.attr({
+                "x2": event.offsetX,
+                "y2": event.offsetY
+            })
+        })
+    }
+}
+
+// FUNCTION: add second point of segment and reset
+function addSegmentEnd(event) {
+    startPoint = temp.findOne("circle")
+    tempEdge = temp.findOne("line")
+    endPoint = addPoint(event)
+    if (startPoint && endPoint && tempEdge) {
+        // remove event listener moving temp line
+        canvas.off('mousemove')
+
+        // get coordinates for each point
+        startP_coord = startPoint.attr("id").substring(1).split("-");
+        x1 = startP_coord[0]
+        y1 = startP_coord[1]
+        endP_coord = endPoint.attr("id").substring(1).split("-");
+        x2 = endP_coord[0]
+        y2 = endP_coord[1]
+        // id is ordered with points left to right (top to bottom tiebreaker)
+        if (x1 < x2) {
+            id = `e_${startPoint.attr("id")}_${endPoint.attr("id")}`
+        } else if (x1 > x2) {
+            id = `e_${endPoint.attr("id")}_${startPoint.attr("id")}`
+
+        } else {
+            if (y1 < y2) {
+                id = `e_${startPoint.attr("id")}_${endPoint.attr("id")}`
+            } else {
+                id = `e_${endPoint.attr("id")}_${startPoint.attr("id")}`
+            }
+        }
+
+        // update temp line to be solid with proper id, set end, and add non-delete data
+        tempEdge.attr({
+                "x2": x2,
+                "y2": y2,
+                "stroke": "black",
+                "stroke-dasharray": ""
+            })
+            .attr("id", id)
+            .attr("data-dontDelete", true)
+        
+        // move startPoint and tempEdge to proper groups
+        startPoint.putIn(points)
+        tempEdge.putIn(edges)
+
+        console.log(`New Segment: (${x1}x, ${y1}y), (${x2}x, ${y2}y)`)
+    }
+}
+
 // FUNCTION: handle click
 function handleClick(event) {
     selectedBtn = document.querySelector('input[name="graphEdit"]:checked').value
 
-    if (selectedBtn === "removePoint") {
-        deletePoint()
+    if (selectedBtn === "removeFromGraph") {
+        if (inputType === "point") {
+            deletePoint()
+        } 
     }
-    if (selectedBtn === "addPoint") {
-        addPoint(event)
+    if (selectedBtn === "addToGraph") {
+        if (inputType === "point") {
+            addPoint(event)
+        } else if(inputType === "segment") {
+            if (temp.findOne("circle")) {
+                addSegmentEnd(event)
+            } else {
+                addSegmentStart(event)
+            }
+        }
     }
 }
 
 // FUNCTION: toggle cursor and on-click
 function toggleGraphEdit() {
     selectedBtn = document.querySelector('input[name="graphEdit"]:checked').value
-    pointsList = canvas.find('circle')
 
-    if (selectedBtn === "removePoint") {
-        pointsList.each(function(point) {
-            point.addClass("svg-point-remove")
-            point.removeClass("svg-point-add")
-            point.attr("stroke-width", pointSize*2)
-        })
-    } else if (selectedBtn === "addPoint") {
-        pointsList.each(function(point) {
-            point.addClass("svg-point-add")
-            point.removeClass("svg-point-remove")
-            point.attr("stroke-width", pointSize*4)
-        })
-    } else if (selectedBtn === "lockGraph") {
-        pointsList.each(function(point) {
-            point.addClass("svg-point-add")
-            point.removeClass("svg-point-remove")
-            point.attr("stroke-width", pointSize*4)
-        })
+    if (inputType === "point") {
+        pointsList = canvas.find('circle')
+
+        if (selectedBtn === "removeFromGraph") {
+            pointsList.each(function(point) {
+                point.addClass("svg-point-remove")
+                point.removeClass("svg-point-add")
+                point.attr("stroke-width", pointSize*2)
+            })
+        } else if (selectedBtn === "addToGraph") {
+            pointsList.each(function(point) {
+                point.addClass("svg-point-add")
+                point.removeClass("svg-point-remove")
+                point.attr("stroke-width", pointSize*4)
+            })
+        } else if (selectedBtn === "lockGraph") {
+            pointsList.each(function(point) {
+                point.addClass("svg-point-add")
+                point.removeClass("svg-point-remove")
+                point.attr("stroke-width", pointSize*4)
+            })
+        }
     }
 }
 
@@ -208,7 +303,13 @@ function resetStates() {
 
     // remove edges
     edgesList = edges.find('line')
-    edgesList.remove()
+    edgesList.forEach(edge =>{
+        if(edge.attr("data-dontDelete")) {
+            
+        } else {
+            edge.remove()
+        }
+    })
 
     // re-initialize state list
     initStateList()
