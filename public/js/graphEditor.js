@@ -214,12 +214,49 @@ function addSegmentEnd(event) {
             })
             .attr("id", id)
             .attr("data-dontDelete", true)
-        
+
+        // add edge ID to point data
+        startPoint.attr("data-segmentID", id)
+        endPoint.attr("data-segmentID", id)
+            
         // move startPoint and tempEdge to proper groups
         startPoint.putIn(points)
         tempEdge.putIn(edges)
 
         console.log(`New Segment: (${x1}x, ${y1}y), (${x2}x, ${y2}y)`)
+    }
+}
+
+// FUNCTION: delete whole segment including both points
+function deleteSegment() {
+    // check if hovering over any point
+    hoveredCircle = points.findOne('circle:hover')
+    hoveredEdge = edges.findOne('line:hover')
+    
+    if (hoveredCircle) {
+        segmentId = hoveredCircle.attr("data-segmentID")
+        pointIDs = segmentId.split("_")
+        
+        startPoint = points.findOne(`[id=${pointIDs[1]}]`)
+        endPoint = points.findOne(`[id=${pointIDs[2]}]`)
+        segment = edges.findOne(`[id=${segmentId}]`)
+        
+        startPoint.remove()
+        endPoint.remove()
+        segment.remove()
+    } else if (hoveredEdge) {
+        segmentId = hoveredEdge.attr("id")
+        pointIDs = segmentId.split("_")
+        
+        startPoint = points.findOne(`[id=${pointIDs[1]}]`)
+        endPoint = points.findOne(`[id=${pointIDs[2]}]`)
+        segment = edges.findOne(`[id=${segmentId}]`)
+        
+        startPoint.remove()
+        endPoint.remove()
+        segment.remove()
+    } else {
+        console.log("There is no segment to remove at this location")
     }
 }
 
@@ -230,8 +267,11 @@ function handleClick(event) {
     if (selectedBtn === "removeFromGraph") {
         if (inputType === "point") {
             deletePoint()
-        } 
+        } else if (inputType === "segment") {
+            deleteSegment()
+        }
     }
+
     if (selectedBtn === "addToGraph") {
         if (inputType === "point") {
             addPoint(event)
@@ -265,6 +305,40 @@ function toggleGraphEdit() {
                 point.attr("stroke-width", pointSize*4)
             })
         } else if (selectedBtn === "lockGraph") {
+            pointsList.each(function(point) {
+                point.addClass("svg-point-add")
+                point.removeClass("svg-point-remove")
+                point.attr("stroke-width", pointSize*4)
+            })
+        }
+    } else if (inputType === "segment") {
+        pointsList = points.find('circle')
+
+        if (selectedBtn === "removeFromGraph") {
+            canvas.off("mousemove")
+            tempPoint = temp.findOne("circle")
+            if (tempPoint) { tempPoint.remove() }
+            tempEdge = temp.findOne("line")
+            if (tempEdge) { tempEdge.remove() }
+
+            pointsList.each(function(point) {
+                point.addClass("svg-point-remove")
+                point.removeClass("svg-point-add")
+                point.attr("stroke-width", pointSize*2)
+            })
+        } else if (selectedBtn === "addToGraph") {
+            pointsList.each(function(point) {
+                point.addClass("svg-point-add")
+                point.removeClass("svg-point-remove")
+                point.attr("stroke-width", pointSize*4)
+            })
+        } else if (selectedBtn === "lockGraph") {
+            canvas.off("mousemove")
+            tempPoint = temp.findOne("circle")
+            if (tempPoint) { tempPoint.remove() }
+            tempEdge = temp.findOne("line")
+            if (tempEdge) { tempEdge.remove() }
+
             pointsList.each(function(point) {
                 point.addClass("svg-point-add")
                 point.removeClass("svg-point-remove")
