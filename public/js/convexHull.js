@@ -1,21 +1,9 @@
-const inputType = "point"
-let stateList = {
-    "curIteration": -1,
-    "numIterations": -1,
-    "isPlaying": false,
-    "states": []
-}
+import { stateList, initStateList, createEdgeStateUpdatesFromPts, createPointStateUpdate } from "/js/stateList.js"
+import { points, resetStates} from "/js/graphEditor.js"
+import { updateDisplay } from "/js/visualizer.js"
 
-// FUNCTION: initialize stateList
-function initStateList() {
-    stateList = {
-        "curIteration": -1,
-        "numIterations": -1,
-        "isPlaying": false,
-        "states": []
-    }
-    updateDisplay()
-}
+
+window.inputType = "point"
 
 // FUNCTION: track points in order
 function trackPoints() {
@@ -23,21 +11,21 @@ function trackPoints() {
     initStateList()
 
     // get points list and save current state
-    pointsList = points.find('circle')
-    prevPoint = null
+    let pointsList = points.find('circle')
+    let prevPoint = null
 
     if (pointsList.length > 1) {
         // initial states list
-        newStates = []
+        let newStates = []
 
         // initial state
-        curState = {"points": [], "edges": []}
+        let curState = {"points": [], "edges": []}
         newStates.push(curState)
 
         // add states
         pointsList.each(function(point) {
             curState = {"points": [], "edges": []}
-            pointUpdate = {
+            let pointUpdate = {
                 "id": point.attr("id"), 
                 "prev": point.attr(),
                 "next": point.attr()
@@ -47,9 +35,13 @@ function trackPoints() {
             curState.points.push(pointUpdate)
 
             if (prevPoint !== null) {
-                [x1, y1] = prevPoint.attr("id").substring(1).split("-");
-                [x2, y2] = point.attr("id").substring(1).split("-");
-                edgeUpdate = {
+                let p1_coord = prevPoint.attr("id").substring(1).split("-")
+                let x1 = p1_coord[0]
+                let y1 = p1_coord[1]
+                let p2_coord = point.attr("id").substring(1).split("-")
+                let x2 = p2_coord[0]
+                let y2 = p2_coord[1]
+                let edgeUpdate = {
                     "id": `e_${prevPoint.attr("id")}_${point.attr("id")}`, 
                     "prev": {
                         "x1": x1,
@@ -77,7 +69,7 @@ function trackPoints() {
         stateList.curIteration = -1
         stateList.numIterations = newStates.length
 
-        updateDisplay(direction="next")
+        //updateDisplay(direction="next")
     } else {
         stateList = {
             "curIteration": -1,
@@ -95,19 +87,19 @@ function grahamScan() {
     resetStates()
 
     // get list of points and save current states
-    pointsList = points.find("circle")
-    currentStates = {}
+    let pointsList = points.find("circle")
+    let currentStates = {}
     pointsList.each(point => {
         currentStates[point.attr("id")] = point.attr("data-init-state")
     })
 
     // set first state to essentially blank
-    states = []
-    newState = {"points": [], "edges": []}
+    let states = []
+    let newState = {"points": [], "edges": []}
     states.push(newState)
 
     // find left-most point, select bottom one if tie
-    leftPoint = pointsList[0]
+    let leftPoint = pointsList[0]
     pointsList.each(point => {
         if (point.attr("cx") < leftPoint.attr("cx")) {
             leftPoint = point
@@ -118,17 +110,17 @@ function grahamScan() {
 
     // first state added is for selecting left most point
     newState = {"points": [], "edges": []}
-    leftPointUpdate = createPointStateUpdate(leftPoint, currentStates, {
+    let leftPointUpdate = createPointStateUpdate(leftPoint, currentStates, {
         "fill": "blue"
     })
     newState.points.push(leftPointUpdate)
     states.push(newState)
 
     // get polar angle to left point
-    orderedPoints = []
+    let orderedPoints = []
     pointsList.each(point => {
         if (point !== leftPoint) {
-            polarAngle = Math.atan2((-1)*point.attr("cy") - (-1)*leftPoint.attr("cy"), point.attr("cx") - leftPoint.attr("cx"))* 180 / Math.PI
+            let polarAngle = Math.atan2((-1)*point.attr("cy") - (-1)*leftPoint.attr("cy"), point.attr("cx") - leftPoint.attr("cx"))* 180 / Math.PI
             orderedPoints.push({
                 "polarAngle": polarAngle,
                 "point": point
@@ -139,12 +131,12 @@ function grahamScan() {
     // create new state for checking polar angles
     newState = {"points": [], "edges": []}
     orderedPoints.forEach(pointData => {
-        pointUpdate = createPointStateUpdate(pointData.point, currentStates, {
+        let pointUpdate = createPointStateUpdate(pointData.point, currentStates, {
             "fill": "orange"
         })
         newState.points.push(pointUpdate)
 
-        edgeUpdate = createEdgeStateUpdatesFromPts(leftPoint, pointData.point, "extend", currentStates, {
+        let edgeUpdate = createEdgeStateUpdatesFromPts(leftPoint, pointData.point, "extend", currentStates, {
             "stroke": "orange",
             "stroke-dasharray": "10, 10"
         })
@@ -160,12 +152,12 @@ function grahamScan() {
     // create new state for removing polar angle checks in order
     newState = {"points": [], "edges": []}
     orderedPoints.forEach(pointData => {
-        pointUpdate = createPointStateUpdate(pointData.point, currentStates, {
+        let pointUpdate = createPointStateUpdate(pointData.point, currentStates, {
             "fill": "black"
         })
         newState.points.push(pointUpdate)
 
-        edgeUpdate = createEdgeStateUpdatesFromPts(leftPoint, pointData.point, "retract", currentStates, {
+        let edgeUpdate = createEdgeStateUpdatesFromPts(leftPoint, pointData.point, "retract", currentStates, {
             "stroke": "",
             "stroke-dasharray": ""
         })
@@ -174,18 +166,18 @@ function grahamScan() {
     states.push(newState)
 
     // add leftPoint to stack and add first two points to stack and hull
-    hullStack = []
+    let hullStack = []
     hullStack.push(leftPoint)
-    for (i = 0; i < 2; i++) {
-        checkPoint = orderedPoints.shift().point
+    for (let i = 0; i < 2; i++) {
+        let checkPoint = orderedPoints.shift().point
 
         // create new state
         newState = {"points": [], "edges": []}
-        pointUpdate = createPointStateUpdate(checkPoint, currentStates, {
+        let pointUpdate = createPointStateUpdate(checkPoint, currentStates, {
             "fill": "blue"
         })
         newState.points.push(pointUpdate)
-        edgeUpdate = createEdgeStateUpdatesFromPts(hullStack.slice(-1)[0], checkPoint, "extend", currentStates, {
+        let edgeUpdate = createEdgeStateUpdatesFromPts(hullStack.slice(-1)[0], checkPoint, "extend", currentStates, {
             "stroke": "blue"
         })
         newState.edges.push(edgeUpdate)
@@ -197,15 +189,15 @@ function grahamScan() {
 
     // GO POINT BY POINT
     orderedPoints.forEach(pointData => {
-        checkPoint = pointData.point
+        let checkPoint = pointData.point
 
         // ADD NEW POINT TO HULL
         newState = {"points": [], "edges": []}
-        pointUpdate = createPointStateUpdate(checkPoint, currentStates, {
+        let pointUpdate = createPointStateUpdate(checkPoint, currentStates, {
             "fill": "blue"
         })
         newState.points.push(pointUpdate)
-        edgeUpdate = createEdgeStateUpdatesFromPts(hullStack.slice(-1)[0], checkPoint, "extend", currentStates, {
+        let edgeUpdate = createEdgeStateUpdatesFromPts(hullStack.slice(-1)[0], checkPoint, "extend", currentStates, {
             "stroke": "blue"
         })
         newState.edges.push(edgeUpdate)
@@ -214,18 +206,18 @@ function grahamScan() {
         // WHILE TRUE
         while (true) {
             // CHECK CCW TURN OF NEW POINT AND TOP 2 POINTS ON STACK
-            p1 = hullStack.slice(-2, -1)[0];
-            p2 = hullStack.slice(-1)[0];
-            p1_coord = p1.attr("id").substring(1).split("-");
-            x1 = p1_coord[0]
-            y1 = p1_coord[1]
-            p2_coord = p2.attr("id").substring(1).split("-");
-            x2 = p2_coord[0]
-            y2 = p2_coord[1]
-            p3_coord = checkPoint.attr("id").substring(1).split("-");
-            x3 = p3_coord[0]
-            y3 = p3_coord[1]
-            turn = ((x2 - x1)*((-1)*y3 - (-1)*y1)) - (((-1)*y2 - (-1)*y1)*(x3 - x1))
+            let p1 = hullStack.slice(-2, -1)[0];
+            let p2 = hullStack.slice(-1)[0];
+            let p1_coord = p1.attr("id").substring(1).split("-");
+            let x1 = p1_coord[0]
+            let y1 = p1_coord[1]
+            let p2_coord = p2.attr("id").substring(1).split("-");
+            let x2 = p2_coord[0]
+            let y2 = p2_coord[1]
+            let p3_coord = checkPoint.attr("id").substring(1).split("-");
+            let x3 = p3_coord[0]
+            let y3 = p3_coord[1]
+            let turn = ((x2 - x1)*((-1)*y3 - (-1)*y1)) - (((-1)*y2 - (-1)*y1)*(x3 - x1))
 
             // IF CCW
             if (turn > 0) {
@@ -267,7 +259,7 @@ function grahamScan() {
 
     // ADD FINAL CONNECTION OF PATH
     newState = {"points": [], "edges": []}
-    edgeUpdate = createEdgeStateUpdatesFromPts(hullStack.slice(-1)[0], leftPoint, "extend", currentStates, {
+    let edgeUpdate = createEdgeStateUpdatesFromPts(hullStack.slice(-1)[0], leftPoint, "extend", currentStates, {
         "stroke": "blue"
     })
     newState.edges.push(edgeUpdate)
@@ -277,124 +269,10 @@ function grahamScan() {
     stateList.states = states
     stateList.curIteration = -1
     stateList.numIterations = states.length
-    updateDisplay(direction="next")
+    updateDisplay("next")
     console.log("New Graham Scan")
 }
 
-// FUNCTION: create pointUpdate JSON, get current State of point, update attributes, form new current state
-function createPointStateUpdate(point, currentStates, nextAttr) {
-    pointUpdate = {
-        "id": point.attr("id"), 
-        "prev": JSON.parse(currentStates[point.attr("id")]),
-        "next": JSON.parse(currentStates[point.attr("id")])
-    }
-    for (const [key, value] of Object.entries(nextAttr)) {
-        pointUpdate.next[key] = value
-    }
-    currentStates[point.attr("id")] = JSON.stringify(pointUpdate.next)
-
-    return pointUpdate
-}
-
-// FUNCTION: using points, create edgeUpdate JSON, get current State of edge if exists, update attributes, form new current state
-function createEdgeStateUpdatesFromPts(point1, point2, movement, currentStates, nextAttr) {
-    // get coordinates for each point
-    [x1, y1] = point1.attr("id").substring(1).split("-");
-    [x2, y2] = point2.attr("id").substring(1).split("-");
-    // id is ordered with points left to right (top to bottom tiebreaker)
-    if (x1 < x2) {
-        id = `e_${point1.attr("id")}_${point2.attr("id")}`
-    } else if (x1 > x2) {
-        id = `e_${point2.attr("id")}_${point1.attr("id")}`
-
-    } else {
-        if (y1 < y2) {
-            id = `e_${point1.attr("id")}_${point2.attr("id")}`
-        } else {
-            id = `e_${point2.attr("id")}_${point1.attr("id")}`
-        }
-    }
-
-    // search for edge, base form on that
-    edge = currentStates[id]
-    if (edge) {
-        // edge does already exist
-        edgeUpdate = {
-            "id": id, 
-            "prev": JSON.parse(currentStates[id]),
-            "next": JSON.parse(currentStates[id])
-        }
-        for (const [key, value] of Object.entries(nextAttr)) {
-            edgeUpdate.next[key] = value
-        }
-        if (movement === "extend") {
-            edgeUpdate.next["x2"] = JSON.parse(edgeUpdate.prev["data-extended-state"])["x2"]
-            edgeUpdate.next["y2"] = JSON.parse(edgeUpdate.prev["data-extended-state"])["y2"]
-        } else if (movement === "retract") {
-            edgeUpdate.next["x2"] = JSON.parse(edgeUpdate.prev["data-extended-state"])["x1"]
-            edgeUpdate.next["y2"] = JSON.parse(edgeUpdate.prev["data-extended-state"])["y1"]
-        }
-        currentStates[id] = JSON.stringify(edgeUpdate.next)
-
-        return edgeUpdate
-    } else {
-        // edge does NOT already exist
-        edgeUpdate = {
-            "id": id, 
-            "prev": {
-                "x1": x1,
-                "y1": y1,
-                "x2": x1,
-                "y2": y1,
-                "stroke": "",
-                "stroke-dasharray": ""
-            },
-            "next": {
-                "x1": x1,
-                "y1": y1,
-                "x2": x2,
-                "y2": y2,
-                "stroke": "black",
-                "stroke-dasharray": ""
-            }
-        }
-        for (const [key, value] of Object.entries(nextAttr)) {
-            edgeUpdate.next[key] = value
-        }
-        if (movement === "extend") {
-            edgeUpdate.next["x2"] = x2,
-            edgeUpdate.next["y2"] = y2
-        } else if (movement === "retract") {
-            edgeUpdate.next["x2"] = x1,
-            edgeUpdate.next["y2"] = y1
-        }
-
-        // store extended/retracted info
-        edgeExtendedState = JSON.stringify(edgeUpdate.next)
-        edgeRetractedState = JSON.stringify(edgeUpdate.prev)
-        edgeUpdate.prev["data-extended-state"] = edgeExtendedState
-        edgeUpdate.prev["data-retracted-state"] = edgeRetractedState
-        edgeUpdate.next["data-extended-state"] = edgeExtendedState
-        edgeUpdate.next["data-retracted-state"] = edgeRetractedState
-
-        // store current state
-        currentStates[id] = JSON.stringify(edgeUpdate.next)
-
-        return edgeUpdate
-    }
-}
-
-// FUNCTION: using points, create edgeUpdate JSON, get current State of edge if exists, update attributes, form new current state
-function createEdgeStateUpdatesFromEdge(edge, currentStates, nextAttr) {
-    pointUpdate = {
-        "id": point.attr("id"), 
-        "prev": JSON.parse(currentStates[point.attr("id")]),
-        "next": JSON.parse(currentStates[point.attr("id")])
-    }
-    for (const [key, value] of Object.entries(nextAttr)) {
-        pointUpdate.next[key] = value
-    }
-    currentStates[point.attr("id")] = JSON.stringify(pointUpdate.next)
-
-    return pointUpdate
-}
+// set onClick
+document.querySelector("#grahamScanBtn").onclick = grahamScan
+document.querySelector("#trackPointsBtn").onclick = trackPoints

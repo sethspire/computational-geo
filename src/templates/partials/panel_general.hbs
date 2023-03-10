@@ -1,22 +1,23 @@
 <link rel='stylesheet' href='/css/visualizer.css' />
-<script defer src="/js/graphEditor.js"></script>
+<script defer type="module" src="/js/graphEditor.js"></script>
+<script defer type="module" src="/js/visualizer.js"></script>
 
 <div id="side-panel">
     <div id="graph-edit-tools">
-        <button class="panel-btn" title="Resize Graph to Fit Available Area" onclick="resizeSVG()">RESIZE GRAPH</button>
+        <button class="panel-btn" title="Resize Graph to Fit Available Area" id="resizeSVG">RESIZE GRAPH</button>
 
-        <button class="panel-btn" title="Toggle Full-Screen Mode" onclick="fullscreenToggle()">FULL SCREEN</button>
+        <button class="panel-btn" title="Toggle Full-Screen Mode" id="fullscreenToggle">FULL SCREEN</button>
 
-        <button class="panel-btn" title="Clear All Points" onclick="clearAll()">CLEAR ALL</button>
+        <button class="panel-btn" title="Clear All Points" id="clearAll">CLEAR ALL</button>
 
         <div class="panel-selector">
-            <input type="radio" name="graphEdit" id="addToGraph" value="addToGraph" onclick="toggleGraphEdit()" checked>
+            <input type="radio" name="graphEdit" id="addToGraph" value="addToGraph" checked>
             <label  title="Add To Graph" class="selector-left" for="addToGraph">✎</label>
             
-            <input type="radio" name="graphEdit" id="removeFromGraph" value="removeFromGraph" onclick="toggleGraphEdit()">
+            <input type="radio" name="graphEdit" id="removeFromGraph" value="removeFromGraph">
             <label for="removeFromGraph" title="Remove From Graph">╳</label>
 
-            <input type="radio" name="graphEdit" id="lockGraph" value="lockGraph"  onclick="toggleGraphEdit()">
+            <input type="radio" name="graphEdit" id="lockGraph" value="lockGraph">
             <label class="selector-right" title="Lock Graph - Clicks Do Nothing" for="lockGraph">&#128274</label>
         </div>
 

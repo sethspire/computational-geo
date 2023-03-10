@@ -1,10 +1,13 @@
+// imports
+import { initStateList } from "/js/stateList.js"
+
 // global variables
 const svgGraphMargin = 8
 const pointSize = 12
 const voidSize = pointSize*2
 
-let svg_height = -1
-let svg_width = -1
+window.svg_height = -1
+window.svg_width = -1
 
 let canvas = null
 let points = null
@@ -57,6 +60,7 @@ function resizeSVG() {
     canvas.click(function (e) {
         handleClick(e)
     })
+    removeTempSegment()
 
     // log size and return svg canvas
     console.log("New SVG: " + svg_width + "w * " + svg_height + "h")
@@ -83,7 +87,7 @@ function fullscreenToggle() {
             })
     } else {
         // not in full screen, so get main and enter fullscreen
-        main = document.querySelector("main")
+        let main = document.querySelector("main")
         main.requestFullscreen()
             .then(function() {
                 console.log("entered fullscreen")
@@ -100,17 +104,17 @@ function fullscreenToggle() {
 // FUNCTION: add point on click
 function addPoint(event) {
     // check if hovering over any point
-    hoveredCircle = document.querySelector('g > circle:hover')
-    hoveredRectangle = document.querySelector('g > rect:hover')
+    let hoveredCircle = document.querySelector('g > circle:hover')
+    let hoveredRectangle = document.querySelector('g > rect:hover')
 
-    withinHeight = event.offsetY > voidSize && event.offsetY < svg_height-voidSize
-    withinWidth = event.offsetX > voidSize && event.offsetX < svg_width-voidSize
+    let withinHeight = event.offsetY > voidSize && event.offsetY < svg_height-voidSize
+    let withinWidth = event.offsetX > voidSize && event.offsetX < svg_width-voidSize
     
     if (hoveredCircle === null && hoveredRectangle === null && withinHeight && withinWidth) {
         const x = event.offsetX 
         const y = event.offsetY 
 
-        newPoint = points.circle(pointSize)
+        let newPoint = points.circle(pointSize)
             .center(x, y)
             .attr({
                 "fill": "black",
@@ -120,7 +124,7 @@ function addPoint(event) {
             })
             .addClass("svg-point-add")
             .attr("id", `p${x}-${y}`)
-        pointInitialState = JSON.stringify(newPoint.attr())
+        let pointInitialState = JSON.stringify(newPoint.attr())
         newPoint.attr("data-init-state", pointInitialState)
 
         console.log("New Point: " + x + "x, " + y + "y")
@@ -136,7 +140,7 @@ function addPoint(event) {
 // FUNCTION: delete point on click
 function deletePoint() {
     // check if hovering over any point
-    hoveredCircle = document.querySelector('g > circle:hover')
+    let hoveredCircle = document.querySelector('g > circle:hover')
     
     if (hoveredCircle) {
         hoveredCircle.remove()
@@ -148,7 +152,7 @@ function deletePoint() {
 
 // FUNCTION: add first point of segment
 function addSegmentStart(event) {
-    startPoint = addPoint(event)
+    let startPoint = addPoint(event)
     if (startPoint) {
         // move new point into temp
         startPoint.putIn(temp)
@@ -166,7 +170,7 @@ function addSegmentStart(event) {
 
         // add event listener moving temp line
         canvas.on('mousemove', function(event) {
-            tempEdge = temp.findOne("line")
+            let tempEdge = temp.findOne("line")
             tempEdge.attr({
                 "x2": event.offsetX,
                 "y2": event.offsetY
@@ -177,21 +181,22 @@ function addSegmentStart(event) {
 
 // FUNCTION: add second point of segment and reset
 function addSegmentEnd(event) {
-    startPoint = temp.findOne("circle")
-    tempEdge = temp.findOne("line")
-    endPoint = addPoint(event)
+    let startPoint = temp.findOne("circle")
+    let tempEdge = temp.findOne("line")
+    let endPoint = addPoint(event)
     if (startPoint && endPoint && tempEdge) {
         // remove event listener moving temp line
         canvas.off('mousemove')
 
         // get coordinates for each point
-        startP_coord = startPoint.attr("id").substring(1).split("-");
-        x1 = startP_coord[0]
-        y1 = startP_coord[1]
-        endP_coord = endPoint.attr("id").substring(1).split("-");
-        x2 = endP_coord[0]
-        y2 = endP_coord[1]
+        let startP_coord = startPoint.attr("id").substring(1).split("-");
+        let x1 = startP_coord[0]
+        let y1 = startP_coord[1]
+        let endP_coord = endPoint.attr("id").substring(1).split("-");
+        let x2 = endP_coord[0]
+        let y2 = endP_coord[1]
         // id is ordered with points left to right (top to bottom tiebreaker)
+        let id = null
         if (x1 < x2) {
             id = `e_${startPoint.attr("id")}_${endPoint.attr("id")}`
         } else if (x1 > x2) {
@@ -214,6 +219,10 @@ function addSegmentEnd(event) {
             })
             .attr("id", id)
             .attr("data-dontDelete", true)
+        
+        // set init state data for edge
+        let edgeInitialState = JSON.stringify(tempEdge.attr())
+        tempEdge.attr("data-init-state", edgeInitialState)
 
         // add edge ID to point data
         startPoint.attr("data-segmentID", id)
@@ -230,27 +239,27 @@ function addSegmentEnd(event) {
 // FUNCTION: delete whole segment including both points
 function deleteSegment() {
     // check if hovering over any point
-    hoveredCircle = points.findOne('circle:hover')
-    hoveredEdge = edges.findOne('line:hover')
+    let hoveredCircle = points.findOne('circle:hover')
+    let hoveredEdge = edges.findOne('line:hover')
     
     if (hoveredCircle) {
-        segmentId = hoveredCircle.attr("data-segmentID")
-        pointIDs = segmentId.split("_")
+        let segmentId = hoveredCircle.attr("data-segmentID")
+        let pointIDs = segmentId.split("_")
         
-        startPoint = points.findOne(`[id=${pointIDs[1]}]`)
-        endPoint = points.findOne(`[id=${pointIDs[2]}]`)
-        segment = edges.findOne(`[id=${segmentId}]`)
+        let startPoint = points.findOne(`[id=${pointIDs[1]}]`)
+        let endPoint = points.findOne(`[id=${pointIDs[2]}]`)
+        let segment = edges.findOne(`[id=${segmentId}]`)
         
         startPoint.remove()
         endPoint.remove()
         segment.remove()
     } else if (hoveredEdge) {
-        segmentId = hoveredEdge.attr("id")
-        pointIDs = segmentId.split("_")
+        let segmentId = hoveredEdge.attr("id")
+        let pointIDs = segmentId.split("_")
         
-        startPoint = points.findOne(`[id=${pointIDs[1]}]`)
-        endPoint = points.findOne(`[id=${pointIDs[2]}]`)
-        segment = edges.findOne(`[id=${segmentId}]`)
+        let startPoint = points.findOne(`[id=${pointIDs[1]}]`)
+        let endPoint = points.findOne(`[id=${pointIDs[2]}]`)
+        let segment = edges.findOne(`[id=${segmentId}]`)
         
         startPoint.remove()
         endPoint.remove()
@@ -260,9 +269,17 @@ function deleteSegment() {
     }
 }
 
+function removeTempSegment() {
+    canvas.off("mousemove")
+    let tempPoint = temp.findOne("circle")
+    if (tempPoint) { tempPoint.remove() }
+    let tempEdge = temp.findOne("line")
+    if (tempEdge) { tempEdge.remove() }
+}
+
 // FUNCTION: handle click
 function handleClick(event) {
-    selectedBtn = document.querySelector('input[name="graphEdit"]:checked').value
+    let selectedBtn = document.querySelector('input[name="graphEdit"]:checked').value
 
     if (selectedBtn === "removeFromGraph") {
         if (inputType === "point") {
@@ -287,10 +304,10 @@ function handleClick(event) {
 
 // FUNCTION: toggle cursor and on-click
 function toggleGraphEdit() {
-    selectedBtn = document.querySelector('input[name="graphEdit"]:checked').value
+    let selectedBtn = document.querySelector('input[name="graphEdit"]:checked').value
 
     if (inputType === "point") {
-        pointsList = canvas.find('circle')
+        let pointsList = canvas.find('circle')
 
         if (selectedBtn === "removeFromGraph") {
             pointsList.each(function(point) {
@@ -312,14 +329,10 @@ function toggleGraphEdit() {
             })
         }
     } else if (inputType === "segment") {
-        pointsList = points.find('circle')
+        let pointsList = points.find('circle')
 
         if (selectedBtn === "removeFromGraph") {
-            canvas.off("mousemove")
-            tempPoint = temp.findOne("circle")
-            if (tempPoint) { tempPoint.remove() }
-            tempEdge = temp.findOne("line")
-            if (tempEdge) { tempEdge.remove() }
+            removeTempSegment()
 
             pointsList.each(function(point) {
                 point.addClass("svg-point-remove")
@@ -333,11 +346,7 @@ function toggleGraphEdit() {
                 point.attr("stroke-width", pointSize*4)
             })
         } else if (selectedBtn === "lockGraph") {
-            canvas.off("mousemove")
-            tempPoint = temp.findOne("circle")
-            if (tempPoint) { tempPoint.remove() }
-            tempEdge = temp.findOne("line")
-            if (tempEdge) { tempEdge.remove() }
+            removeTempSegment()
 
             pointsList.each(function(point) {
                 point.addClass("svg-point-add")
@@ -351,32 +360,34 @@ function toggleGraphEdit() {
 // FUNCTION: clear all
 function clearAll() {
     //confirm user wants to clear all
-    confirmClear = confirm("Are you sure you want to clear all?")
+    let confirmClear = confirm("Are you sure you want to clear all?")
     
     if (confirmClear) {
-        pointsList = points.find('circle')
+        let pointsList = points.find('circle')
         pointsList.remove()
 
-        edgesList = edges.find('line')
+        let edgesList = edges.find('line')
         edgesList.remove()
+
+        removeTempSegment()
     }
 }
 
 // FUNCTION: reset to initial state
 function resetStates() {
     // reset points to initial state
-    pointsList = points.find('circle')
+    let pointsList = points.find('circle')
     pointsList.forEach(point => {
-        initState = JSON.parse(point.attr("data-init-state"))
-        curClass = point.attr("class")
-        curStrokeWidth = point.attr("stroke-width")
-        point.attr(initState)
+        let initialState = JSON.parse(point.attr("data-init-state"))
+        let curClass = point.attr("class")
+        let curStrokeWidth = point.attr("stroke-width")
+        point.attr(initialState)
         point.attr("class", curClass)
         point.attr("stroke-width", curStrokeWidth)
     })
 
-    // remove edges
-    edgesList = edges.find('line')
+    // remove edges if lack data-dontDelete
+    let edgesList = edges.find('line')
     edgesList.forEach(edge =>{
         if(edge.attr("data-dontDelete")) {
             
@@ -385,9 +396,23 @@ function resetStates() {
         }
     })
 
+    //remove temp stuff
+    removeTempSegment()
+
     // re-initialize state list
     initStateList()
 }
 
 // immediately run to create initial SVG
 resizeSVG()
+
+// set onClick
+document.querySelector("#resizeSVG").onclick = resizeSVG
+document.querySelector("#fullscreenToggle").onclick = fullscreenToggle
+document.querySelector("#clearAll").onclick = clearAll
+document.querySelector("#addToGraph").onclick = toggleGraphEdit
+document.querySelector("#removeFromGraph").onclick = toggleGraphEdit
+document.querySelector("#lockGraph").onclick = toggleGraphEdit
+
+// export needed things
+export { canvas, points, edges, boundary, temp, resetStates }

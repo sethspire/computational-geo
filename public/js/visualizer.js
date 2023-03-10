@@ -1,3 +1,7 @@
+// imports
+import { stateList } from "/js/stateList.js"
+import { points, edges } from "/js/graphEditor.js"
+
 function updateDisplay(direction) {
     if (direction === "next" && stateList.curIteration < stateList.numIterations-1) {
         //increment curIteration
@@ -43,7 +47,7 @@ function updateDisplay(direction) {
 }
 
 function updatePoint(pointData, direction) {
-    point = points.findOne(`[id=${pointData.id}]`)
+    let point = points.findOne(`[id=${pointData.id}]`)
     if (point) {
         point.attr(pointData[direction])
     } else {
@@ -54,7 +58,7 @@ function updatePoint(pointData, direction) {
 }
 
 function updateEdge(edgeData, direction) {
-    edge = edges.findOne(`[id=${edgeData.id}]`)
+    let edge = edges.findOne(`[id=${edgeData.id}]`)
     if (edge) {
         edge.attr(edgeData[direction])
     } else {
@@ -65,7 +69,7 @@ function updateEdge(edgeData, direction) {
 }
 
 function updateProgressBar(curIter, numIter) {
-    progressBar = document.getElementById("media-progress")
+    let progressBar = document.getElementById("media-progress")
     progressBar.setAttribute("value", curIter+1)
     progressBar.setAttribute("max", numIter)
 }
@@ -78,7 +82,7 @@ function toStart() {
 
 function previousState() {
     stateList.isPlaying = false
-    updateDisplay(direction="prev")
+    updateDisplay("prev")
 }
 
 function playPause() {
@@ -105,7 +109,7 @@ function playThrough() {
 
 function nextState() {
     stateList.isPlaying = false
-    updateDisplay(direction="next")
+    updateDisplay("next")
 }
 
 function toEnd() {
@@ -119,3 +123,5 @@ document.querySelector("#media-previous").onclick = previousState
 document.querySelector("#media-playpause").onclick = playPause
 document.querySelector("#media-next").onclick = nextState
 document.querySelector("#media-to-end").onclick = toEnd
+
+export { updateDisplay }
