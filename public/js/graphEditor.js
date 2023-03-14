@@ -1,9 +1,10 @@
 // imports
 import { initStateList } from "/js/stateList.js"
+import { getEdgeId } from "/js/helper.js"
 
 // global variables
 const svgGraphMargin = 8
-const pointSize = 12
+window.pointSize = 12
 const voidSize = pointSize*2
 
 window.svg_height = -1
@@ -189,33 +190,23 @@ function addSegmentEnd(event) {
         canvas.off('mousemove')
 
         // get coordinates for each point
-        let startP_coord = startPoint.attr("id").substring(1).split("-");
-        let x1 = startP_coord[0]
-        let y1 = startP_coord[1]
-        let endP_coord = endPoint.attr("id").substring(1).split("-");
-        let x2 = endP_coord[0]
-        let y2 = endP_coord[1]
+        let p1_coord = startPoint.attr("id").substring(1).split("-")
+        let x1 = Number(p1_coord[0])
+        let y1 = Number(p1_coord[1])
+        let p2_coord = endPoint.attr("id").substring(1).split("-")
+        let x2 = Number(p2_coord[0])
+        let y2 = Number(p2_coord[1])
+        
         // id is ordered with points left to right (top to bottom tiebreaker)
-        let id = null
-        if (x1 < x2) {
-            id = `e_${startPoint.attr("id")}_${endPoint.attr("id")}`
-        } else if (x1 > x2) {
-            id = `e_${endPoint.attr("id")}_${startPoint.attr("id")}`
-
-        } else {
-            if (y1 < y2) {
-                id = `e_${startPoint.attr("id")}_${endPoint.attr("id")}`
-            } else {
-                id = `e_${endPoint.attr("id")}_${startPoint.attr("id")}`
-            }
-        }
+        let id = getEdgeId(startPoint, endPoint)
 
         // update temp line to be solid with proper id, set end, and add non-delete data
         tempEdge.attr({
                 "x2": x2,
                 "y2": y2,
                 "stroke": "black",
-                "stroke-dasharray": ""
+                "stroke-dasharray": "",
+                "stroke-width": 1
             })
             .attr("id", id)
             .attr("data-dontDelete", true)
@@ -378,12 +369,16 @@ function resetStates() {
     // reset points to initial state
     let pointsList = points.find('circle')
     pointsList.forEach(point => {
-        let initialState = JSON.parse(point.attr("data-init-state"))
-        let curClass = point.attr("class")
-        let curStrokeWidth = point.attr("stroke-width")
-        point.attr(initialState)
-        point.attr("class", curClass)
-        point.attr("stroke-width", curStrokeWidth)
+        if (point.attr("data-init-state")) {
+            let initialState = JSON.parse(point.attr("data-init-state"))
+            let curClass = point.attr("class")
+            let curStrokeWidth = point.attr("stroke-width")
+            point.attr(initialState)
+            point.attr("class", curClass)
+            point.attr("stroke-width", curStrokeWidth)
+        } else {
+            point.remove()
+        }
     })
 
     // remove edges if lack data-dontDelete

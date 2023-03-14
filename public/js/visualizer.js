@@ -26,12 +26,14 @@ function updateDisplay(direction) {
         }
     } else if (direction === "prev"  && stateList.curIteration > 0) {
         //update points
-        stateList.states[stateList.curIteration].points.forEach(pointData => {
+        let reversePoints = (stateList.states[stateList.curIteration].points).map((x) => x).reverse()
+        reversePoints.forEach(pointData => {
             updatePoint(pointData, direction)
         })
 
         //update edges
-        stateList.states[stateList.curIteration].edges.forEach(edgeData => {
+        let reverseEdges = (stateList.states[stateList.curIteration].edges).map((x) => x).reverse()
+        reverseEdges.forEach(edgeData => {
             updateEdge(edgeData, direction)
         })
 
@@ -51,7 +53,7 @@ function updatePoint(pointData, direction) {
     if (point) {
         point.attr(pointData[direction])
     } else {
-        newPoint = points.circle()
+        let newPoint = points.circle()
             .attr(pointData[direction])
             .attr("id", pointData.id)
     }

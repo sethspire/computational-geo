@@ -1,4 +1,4 @@
-import { stateList, initStateList, createEdgeStateUpdatesFromPts, createPointStateUpdate } from "/js/stateList.js"
+import { stateList, initStateList, createEdgeStateUpdatesFromPts, createPointStateUpdateFromPt } from "/js/stateList.js"
 import { points, resetStates} from "/js/graphEditor.js"
 import { updateDisplay } from "/js/visualizer.js"
 
@@ -110,7 +110,7 @@ function grahamScan() {
 
     // first state added is for selecting left most point
     newState = {"points": [], "edges": []}
-    let leftPointUpdate = createPointStateUpdate(leftPoint, currentStates, {
+    let leftPointUpdate = createPointStateUpdateFromPt(leftPoint, currentStates, {
         "fill": "blue"
     })
     newState.points.push(leftPointUpdate)
@@ -131,7 +131,7 @@ function grahamScan() {
     // create new state for checking polar angles
     newState = {"points": [], "edges": []}
     orderedPoints.forEach(pointData => {
-        let pointUpdate = createPointStateUpdate(pointData.point, currentStates, {
+        let pointUpdate = createPointStateUpdateFromPt(pointData.point, currentStates, {
             "fill": "orange"
         })
         newState.points.push(pointUpdate)
@@ -152,7 +152,7 @@ function grahamScan() {
     // create new state for removing polar angle checks in order
     newState = {"points": [], "edges": []}
     orderedPoints.forEach(pointData => {
-        let pointUpdate = createPointStateUpdate(pointData.point, currentStates, {
+        let pointUpdate = createPointStateUpdateFromPt(pointData.point, currentStates, {
             "fill": "black"
         })
         newState.points.push(pointUpdate)
@@ -173,7 +173,7 @@ function grahamScan() {
 
         // create new state
         newState = {"points": [], "edges": []}
-        let pointUpdate = createPointStateUpdate(checkPoint, currentStates, {
+        let pointUpdate = createPointStateUpdateFromPt(checkPoint, currentStates, {
             "fill": "blue"
         })
         newState.points.push(pointUpdate)
@@ -193,7 +193,7 @@ function grahamScan() {
 
         // ADD NEW POINT TO HULL
         newState = {"points": [], "edges": []}
-        let pointUpdate = createPointStateUpdate(checkPoint, currentStates, {
+        let pointUpdate = createPointStateUpdateFromPt(checkPoint, currentStates, {
             "fill": "blue"
         })
         newState.points.push(pointUpdate)
@@ -226,7 +226,7 @@ function grahamScan() {
             } else {
                 // SHOW ANGLE IS BAD
                 newState = {"points": [], "edges": []}
-                pointUpdate = createPointStateUpdate(hullStack.slice(-1)[0], currentStates, {
+                pointUpdate = createPointStateUpdateFromPt(hullStack.slice(-1)[0], currentStates, {
                     "fill": "red"
                 })
                 newState.points.push(pointUpdate)
