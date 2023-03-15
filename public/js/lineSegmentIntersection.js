@@ -204,7 +204,7 @@ function lineSweep() {
     stateList.numIterations = states.length
     updateDisplay("next")
     console.log("New Line Sweep")
-    console.log(`Comparisons: ${comparisons}`)
+    console.log(`Edges:${edgesList.length} ; Comparisons:${comparisons} ;  Brute Forces:${(edgesList.length*(edgesList.length-1))/2}`)
 }
 
 
@@ -512,4 +512,3 @@ document.querySelector("#lineSweepEndpointsBtn").onclick = lineSweepEndpoints
 // TODO
 // - in left event:
 //      If there is an event associated with this pair, remove it from the event queue
-//      If find intersection, add it to event queue
