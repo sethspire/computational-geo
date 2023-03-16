@@ -1,0 +1,1 @@
+window.inputType = "polygon-simple"

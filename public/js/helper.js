@@ -1,3 +1,5 @@
+import { points } from "/js/graphEditor.js"
+
 class PriorityQueue {
     constructor(comparator = (a, b) => a > b) {
         this._heap = []
@@ -439,6 +441,181 @@ class AVLTree {
     }
 }
 
+// segment for sweep status
+class SegmentStatus {
+    constructor(segment) {
+        this.segment = segment
+        this.linearEq = getLineEquation(segment)
+        this.slope = this.linearEq[0]
+        this.y_int = this.linearEq[1]
+        this.sortVal = () => {
+            //console.log(this.slope)
+            return this.slope*(window.sweepX-0.00000000001) + this.y_int
+        }
+    }
+}
+
+// FUNCTION: get the slope and y intercept of a segment
+function getLineEquation(segment) {
+    let segmentId = segment.attr("id")
+    let pointIDs = segmentId.split("_").slice(1,3)
+
+    let p1_coord = pointIDs[0].substring(1).split("-")
+    let x1 = Number(p1_coord[0])
+    let y1 = Number(p1_coord[1])
+    let p2_coord = pointIDs[1].substring(1).split("-")
+    let x2 = Number(p2_coord[0])
+    let y2 = Number(p2_coord[1])
+
+    let slope = (y1-y2)/(x1-x2)
+    let y_int = (x1*y2 - y1*x2)/(x1-x2)
+
+    return [slope, y_int]
+}
+
+// FUNCTION: Given three collinear points p, q, r, the function checks if point q lies on line segment 'pr'
+function onSegment(p, q, r) {
+    let p_x = p.attr("cx")
+    let q_x = q.attr("cx")
+    let r_x = r.attr("cx")
+    let p_y = p.attr("cy")
+    let q_y = q.attr("cy")
+    let r_y = r.attr("cy")
+    if (q_x <= Math.max(p_x, r_x) && q_x >= Math.min(p_x, r_x) &&
+        q_y <= Math.max(p_y, r_y) && q_y >= Math.min(p_y, r_y)) {
+        return true;
+    }
+    
+    return false;
+}
+  
+// FUNCTION: To find orientation of ordered triplet (p, q, r).
+function orientation(p, q, r) {
+    // 0 --> p, q and r are collinear
+    // 1 --> Clockwise
+    // 2 --> Counterclockwise
+    let p_x = p.attr("cx")
+    let q_x = q.attr("cx")
+    let r_x = r.attr("cx")
+    let p_y = p.attr("cy")
+    let q_y = q.attr("cy")
+    let r_y = r.attr("cy")
+
+    let val = (q_y-p_y) * (r_x-q_x) - (q_x-p_x) * (r_y-q_y);
+    
+    if (val == 0) return 0; // collinear
+    
+    return (val > 0)? 1: 2; // clock or counterclock wise
+}
+  
+// FUNCTION: returns true if line segments intersect.
+function doIntersect(segment1, segment2) {
+    let segment1Id = segment1.attr("id")
+    let segment1PointIDs = segment1Id.split("_").slice(1,3)
+    let p1 = points.findOne(`[id=${segment1PointIDs[0]}]`)
+    let q1 = points.findOne(`[id=${segment1PointIDs[1]}]`)
+    let segment2Id = segment2.attr("id")
+    let segment2PointIDs = segment2Id.split("_").slice(1,3)
+    let p2 = points.findOne(`[id=${segment2PointIDs[0]}]`)
+    let q2 = points.findOne(`[id=${segment2PointIDs[1]}]`)
+
+    return doIntersectFromPts(p1, q1, p2, q2)
+}
+
+// FUNCTION: returns true if the points of segments indicate intersection
+function doIntersectFromPts(p1, q1, p2, q2) {
+    // Find the four orientations needed for general and special cases
+    let o1 = orientation(p1, q1, p2);
+    let o2 = orientation(p1, q1, q2);
+    let o3 = orientation(p2, q2, p1);
+    let o4 = orientation(p2, q2, q1);
+    
+    // General case
+    if (o1 != o2 && o3 != o4) return true
+
+    // Special Cases
+    // p1, q1 and p2 are collinear and p2 lies on segment p1q1
+    if (o1 == 0 && onSegment(p1, p2, q1)) return true;
+    
+    // p1, q1 and q2 are collinear and q2 lies on segment p1q1
+    if (o2 == 0 && onSegment(p1, q2, q1)) return true;
+    
+    // p2, q2 and p1 are collinear and p1 lies on segment p2q2
+    if (o3 == 0 && onSegment(p2, p1, q2)) return true;
+    
+    // p2, q2 and q1 are collinear and q1 lies on segment p2q2
+    if (o4 == 0 && onSegment(p2, q1, q2)) return true;
+    
+    return false; // Doesn't fall in any of the above cases
+}
+
+// FUNCTION: get intersection of two segments
+function getSegmentsIntersection(segment1, segment2) {
+    // get points of segments
+    let segment1Id = segment1.attr("id")
+    let segment1PointIDs = segment1Id.split("_").slice(1,3)
+    let A = points.findOne(`[id=${segment1PointIDs[0]}]`)
+    let B = points.findOne(`[id=${segment1PointIDs[1]}]`)
+    let segment2Id = segment2.attr("id")
+    let segment2PointIDs = segment2Id.split("_").slice(1,3)
+    let C = points.findOne(`[id=${segment2PointIDs[0]}]`)
+    let D = points.findOne(`[id=${segment2PointIDs[1]}]`)
+
+    return getSegmentIntersectionFromPts(A, B, C, D)
+}
+
+// FUNCTION: get intersection of 2 lines based on endpoints of 2 segments
+function getSegmentIntersectionFromPts(A, B, C, D) {
+    // Line AB represented as a1x + b1y = c1
+    var a1 = B.attr("cy") - A.attr("cy");
+    var b1 = A.attr("cx") - B.attr("cx");
+    var c1 = a1*(A.attr("cx")) + b1*(A.attr("cy"));
+    
+    // Line CD represented as a2x + b2y = c2
+    var a2 = D.attr("cy") - C.attr("cy");
+    var b2 = C.attr("cx") - D.attr("cx");
+    var c2 = a2*(C.attr("cx"))+ b2*(C.attr("cy"));
+    
+    var determinant = a1*b2 - a2*b1;
+    
+    if (determinant == 0) {
+        // The lines are parallel. This is simplified
+        // by returning a pair of FLT_MAX
+        return null;
+    }
+    else {
+        var x = (b2*c1 - b1*c2)/determinant;
+        var y = (a1*c2 - a2*c1)/determinant;
+        return [x, y];
+    }
+}
+
+//FUNCTION: using endpoints, check if 2 segments overlap outside of single endpoint
+function doOverlapFromPts(A, B, C, D) {
+    let intersectionLoc = getSegmentIntersectionFromPts(A, B, C, D)
+    if (intersectionLoc === null) {
+        // since null, they are the same line, now need to check if x-range (and by default y-range) overlap
+        let segment1_minX = Math.min(A.attr("cx"), B.attr("cx"))
+        let segment1_maxX = Math.max(A.attr("cx"), B.attr("cx"))
+        let segment2_minX = Math.min(C.attr("cx"), D.attr("cx"))
+        let segment2_maxX = Math.max(C.attr("cx"), D.attr("cx"))
+
+        // overlap if segment 2 minimum X is on range [segment 1 minimum X, segment 1 maximum x)
+        if (segment2_minX >= segment1_minX && segment2_minX < segment1_maxX) {
+            return true
+        }
+        // overlap if segment 2 maximum X is on range (segment 1 minimum X, segment 1 maximum x]
+        if (segment2_maxX <= segment1_maxX && segment2_maxX > segment1_minX) {
+            return true
+        }
+
+        return false
+    } else {
+        return false
+    }
+}
+
+// use points to get Edge ID
 function getEdgeId(point1, point2) {
     // get coordinates for each point
     let p1_coord = point1.attr("id").substring(1).split("-")
@@ -466,4 +643,4 @@ function getEdgeId(point1, point2) {
     return id
 }
 
-export { PriorityQueue, AVLTree, getEdgeId }
+export { PriorityQueue, AVLTree, SegmentStatus, getEdgeId, doIntersect, getSegmentsIntersection, doIntersectFromPts, getSegmentIntersectionFromPts, doOverlapFromPts }
