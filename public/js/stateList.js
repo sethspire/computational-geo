@@ -9,14 +9,16 @@ function initStateList() {
         "curIteration": -1,
         "numIterations": -1,
         "isPlaying": false,
-        "states": []
+        "states": [],
+        "pseudocode": null
     }
     updateDisplay()
+    document.querySelector("#pseudocode").innerHTML = null
 }
 
 // FUNCTION: reset newState and include any resets needed
 function resetNewState(currentStates) {
-    let newState = {"points": [], "edges": []}
+    let newState = {"points": [], "edges": [], "status": "", "codeLines": []}
 
     if (reverseStates) {
         reverseStates["pointsFromPt"].forEach(pointReset => {

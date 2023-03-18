@@ -362,6 +362,8 @@ function clearAll() {
 
         removeTempSegment()
     }
+
+    initStateList()
 }
 
 // FUNCTION: reset to initial state
@@ -396,6 +398,7 @@ function resetStates() {
 
     // re-initialize state list
     initStateList()
+    document.querySelector("#pseudocode").innerHTML = null
 }
 
 // immediately run to create initial SVG

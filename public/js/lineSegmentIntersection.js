@@ -228,7 +228,7 @@ function lineSweepEndpoints() {
 
     // set first state to essentially blank
     let states = []
-    let newState = {"points": [], "edges": []}
+    let newState = resetNewState()
     states.push(newState)
 
     // place all endpoints in a priority queue
@@ -266,7 +266,7 @@ function lineSweepEndpoints() {
         let point = event["point"]
 
         // update sweep line
-        newState = {"points": [], "edges": []}
+        newState = resetNewState()
         let vertLineUpdate = createVerticalEdgeStateUpdatesFromX(point.attr("cx"), currentStates, {
             "stroke-dasharray": "10, 5"
         })

@@ -17,8 +17,9 @@ function updateDisplay(direction) {
             updateEdge(edgeData, direction)
         })
 
-        //update progress bar
+        //update progress bar and code line
         updateProgressBar(stateList.curIteration, stateList.numIterations)
+        updateCodeLines(stateList.states[stateList.curIteration].codeLines)
 
         //update isPlaying if reached end
         if (stateList.curIteration === stateList.numIterations-1) {
@@ -42,6 +43,7 @@ function updateDisplay(direction) {
 
         //update progress bar
         updateProgressBar(stateList.curIteration, stateList.numIterations)
+        updateCodeLines(stateList.states[stateList.curIteration].codeLines)
     } else {
         //update progress bar
         updateProgressBar(stateList.curIteration, stateList.numIterations)
@@ -74,6 +76,30 @@ function updateProgressBar(curIter, numIter) {
     let progressBar = document.getElementById("media-progress")
     progressBar.setAttribute("value", curIter+1)
     progressBar.setAttribute("max", numIter)
+}
+
+function updatePseudocodeText() {
+    let pseudocodeArea = document.querySelector("#pseudocode")
+    stateList.pseudocode.forEach((code, i) => {
+        let text = code.replaceAll(" ", "&nbsp")
+        let newLine = document.createElement("p")
+        newLine.innerHTML = text
+        newLine.id = `code${i+1}`
+        pseudocodeArea.append(newLine)
+    })
+}
+
+function updateCodeLines(lineNumbers=[]) {
+    // remove classes from children
+    let pseudocodeArea = document.querySelector("#pseudocode")
+    pseudocodeArea.children.forEach(child => {
+        child.setAttribute("class", "")
+    })
+
+    lineNumbers.forEach(lineNum => {
+        let line = document.querySelector(`#code${lineNum}`)
+        line.setAttribute("class", "selected-line")
+    })
 }
 
 function toStart() {
@@ -126,4 +152,4 @@ document.querySelector("#media-playpause").onclick = playPause
 document.querySelector("#media-next").onclick = nextState
 document.querySelector("#media-to-end").onclick = toEnd
 
-export { updateDisplay }
+export { updateDisplay, updatePseudocodeText }
