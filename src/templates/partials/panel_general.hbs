@@ -4,11 +4,13 @@
 
 <div id="side-panel">
     <div id="graph-edit-tools">
-        <button class="panel-btn" title="Resize Graph to Fit Available Area" id="resizeSVG">RESIZE GRAPH</button>
+        <div id="svg-change">
+            <button class="panel-btn" title="Resize Graph to Fit Available Area" id="resizeSVG">RESIZE</button>
 
-        <button class="panel-btn" title="Toggle Full-Screen Mode" id="fullscreenToggle">FULL SCREEN</button>
+            <button class="panel-btn" title="Clear All Elements" id="clearAll">CLEAR</button>
 
-        <button class="panel-btn" title="Clear All Points" id="clearAll">CLEAR ALL</button>
+            <button class="panel-btn" title="Toggle Full-Screen Mode" id="fullscreenToggle">FULL SCREEN</button>
+        </div>
 
         <div class="panel-selector">
             <input type="radio" name="graphEdit" id="addToGraph" value="addToGraph" checked>
@@ -30,6 +32,13 @@
             <progress id="media-progress" value="-1" max="-1"></progress>
         </div>
 
-        {{> (lookup . 'algorithms')}}
+        <div id="algorithmsButtons">
+            {{> (lookup . 'algorithms')}}
+        </div>
+
+        <div id="algorithmStatus">
+            <div id="codeStatus"></div>
+            <div id="pseudocode"></div>
+        </div>
     </div>
 </div>

@@ -1,5 +1,5 @@
 :root {
-    --panel-width: 10em;
+    --panel-width: 17.25em;
 }
 
 
@@ -17,7 +17,7 @@ main  {
     flex-direction: row;
 }
 #graph-area {
-    width: calc(100% - var(--panel-width));
+    width: calc(100%);
     height: 100%;
     background-color: black;
 }
@@ -33,13 +33,17 @@ SIDE PANEL
     width: var(--panel-width);
     height: 100%;
     background-color: var(--clr-background-medium);
+    font-size: 0.875em;
 }
 /* panel buttons */
+#svg-change {
+    margin: 0.5em;
+}
 .panel-btn {
-    display: block;
+    display: inline-block;
     border: 0.125em solid var(--clr-background-dark);
     border-radius: 2em;
-    margin: 0.5em;
+    margin: 0 0 0.5em 0;
     background-color: transparent;
     font-weight: bold;
 }
@@ -56,7 +60,7 @@ SIDE PANEL
     color: var(--clr-background-medium);
 }
 #media-panel {
-    margin-left: 0.5em;
+    margin: 1em 0.5em;
 }
 .media-control {
     display: inline-block;
@@ -100,6 +104,34 @@ button > img {
 .panel-selector input[type="radio"]:checked+label {
     background-color: var(--clr-background-dark);
     color: var(--clr-background-medium);
+}
+#algorithmsButtons {
+    margin: 0.5em;
+}
+/* algorithm and psuedocode status*/
+#algorithmStatus {
+    margin: 0.5em;
+    border: 0.125em solid var(--clr-background-dark);
+    border-radius: 1em;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.75rem;
+}
+#codeStatus {
+    height: 3em;
+    background-color: var(--clr-background-dark);
+    border-radius: 0.8em 0.8em 0 0;
+    color: white;
+}
+#pseudocode {
+    min-height: 2em;
+    margin: 0.5em;
+}
+#pseudocode > p {
+    margin: 0.125em 0;
+}
+.selected-line {
+    background-color: var(--clr-background-dark);
+    color: white;
 }
 
 /*

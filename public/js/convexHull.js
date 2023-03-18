@@ -1,6 +1,6 @@
-import { stateList, initStateList, createEdgeStateUpdatesFromPts, createPointStateUpdateFromPt } from "/js/stateList.js"
+import { stateList, initStateList, createEdgeStateUpdatesFromPts, createPointStateUpdateFromPt, resetNewState } from "/js/stateList.js"
 import { points, resetStates} from "/js/graphEditor.js"
-import { updateDisplay } from "/js/visualizer.js"
+import { updateDisplay, updatePseudocodeText } from "/js/visualizer.js"
 
 
 window.inputType = "point"
@@ -95,7 +95,7 @@ function grahamScan() {
 
     // set first state to essentially blank
     let states = []
-    let newState = {"points": [], "edges": []}
+    let newState = resetNewState()
     states.push(newState)
 
     // find left-most point, select bottom one if tie
@@ -109,11 +109,12 @@ function grahamScan() {
     })
 
     // first state added is for selecting left most point
-    newState = {"points": [], "edges": []}
+    newState = resetNewState()
     let leftPointUpdate = createPointStateUpdateFromPt(leftPoint, currentStates, {
         "fill": "blue"
     })
     newState.points.push(leftPointUpdate)
+    newState.codeLines = [1]
     states.push(newState)
 
     // get polar angle to left point
@@ -129,7 +130,7 @@ function grahamScan() {
     })
 
     // create new state for checking polar angles
-    newState = {"points": [], "edges": []}
+    newState = resetNewState()
     orderedPoints.forEach(pointData => {
         let pointUpdate = createPointStateUpdateFromPt(pointData.point, currentStates, {
             "fill": "orange"
@@ -142,6 +143,7 @@ function grahamScan() {
         })
         newState.edges.push(edgeUpdate)
     })
+    newState.codeLines = [2]
     states.push(newState)
 
     // sort points in counterclockwise fashion
@@ -150,7 +152,7 @@ function grahamScan() {
     })
 
     // create new state for removing polar angle checks in order
-    newState = {"points": [], "edges": []}
+    newState = resetNewState()
     orderedPoints.forEach(pointData => {
         let pointUpdate = createPointStateUpdateFromPt(pointData.point, currentStates, {
             "fill": "black"
@@ -163,6 +165,7 @@ function grahamScan() {
         })
         newState.edges.push(edgeUpdate)
     })
+    newState.codeLines = [3]
     states.push(newState)
 
     // add leftPoint to stack and add first two points to stack and hull
@@ -172,7 +175,7 @@ function grahamScan() {
         let checkPoint = orderedPoints.shift().point
 
         // create new state
-        newState = {"points": [], "edges": []}
+        newState = resetNewState()
         let pointUpdate = createPointStateUpdateFromPt(checkPoint, currentStates, {
             "fill": "blue"
         })
@@ -181,6 +184,7 @@ function grahamScan() {
             "stroke": "blue"
         })
         newState.edges.push(edgeUpdate)
+        newState.codeLines = [4]
         states.push(newState)
 
         // push point to hullStack
@@ -192,7 +196,7 @@ function grahamScan() {
         let checkPoint = pointData.point
 
         // ADD NEW POINT TO HULL
-        newState = {"points": [], "edges": []}
+        newState = resetNewState()
         let pointUpdate = createPointStateUpdateFromPt(checkPoint, currentStates, {
             "fill": "blue"
         })
@@ -201,6 +205,7 @@ function grahamScan() {
             "stroke": "blue"
         })
         newState.edges.push(edgeUpdate)
+        newState.codeLines = [6]
         states.push(newState)
 
         // WHILE TRUE
@@ -225,7 +230,7 @@ function grahamScan() {
                 break
             } else {
                 // SHOW ANGLE IS BAD
-                newState = {"points": [], "edges": []}
+                newState = resetNewState()
                 pointUpdate = createPointStateUpdateFromPt(hullStack.slice(-1)[0], currentStates, {
                     "fill": "red"
                 })
@@ -238,14 +243,16 @@ function grahamScan() {
                     "stroke": "red"
                 })
                 newState.edges.push(edgeUpdate)
+                newState.codeLines = [8]
                 states.push(newState)
 
                 // SHOW NEW PATH
-                newState = {"points": [], "edges": []}
+                newState = resetNewState()
                 edgeUpdate = createEdgeStateUpdatesFromPts(hullStack.slice(-2, -1)[0], checkPoint, "extend", currentStates, {
                     "stroke": "blue"
                 })
                 newState.edges.push(edgeUpdate)
+                newState.codeLines = [9]
                 states.push(newState)
 
                 // POP PREV POINT FROM STACK
@@ -258,20 +265,37 @@ function grahamScan() {
     })
 
     // ADD FINAL CONNECTION OF PATH
-    newState = {"points": [], "edges": []}
+    newState = resetNewState()
     let edgeUpdate = createEdgeStateUpdatesFromPts(hullStack.slice(-1)[0], leftPoint, "extend", currentStates, {
         "stroke": "blue"
     })
     newState.edges.push(edgeUpdate)
+    newState.codeLines = [10]
     states.push(newState)
 
-    // set new states to stateList
+    // set new states to stateList, update it, add pseudocode, update display
     stateList.states = states
     stateList.curIteration = -1
     stateList.numIterations = states.length
+    stateList.pseudocode = grahamScanCode
+    updatePseudocodeText()
     updateDisplay("next")
     console.log("New Graham Scan")
 }
+
+// algorithm pseudocode lines
+const grahamScanCode = [
+    "get left-most point",
+    "find polar angles",
+    "order by polar angles",
+    "add first 2 points to hull",
+    "for each point:",
+    "  add point to hull",
+    "  while true:",
+    "    if concave:",
+    "       remove previous point",
+    "connect ends of hull"
+]
 
 // set onClick
 document.querySelector("#grahamScanBtn").onclick = grahamScan
