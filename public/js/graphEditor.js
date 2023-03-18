@@ -330,7 +330,7 @@ function addPolygonTempLines_simple() {
     let newPoint = allPoints[allPoints.length-1]
 
     // show where completing line would be
-    if (allPoints.length >= 2) {
+    if (allPoints.length > 2) {
         let testLine = temp.findOne("line[id=testLine]")
         if (testLine) {
             testLine.remove()
@@ -353,7 +353,7 @@ function addPolygonTempLines_simple() {
         })
 
         // set stroke color based on if intersects
-        let strokeColor = foundIntersection ? "red" : "blue"
+        let strokeColor = foundIntersection ? "red" : "lime"
 
         // add temp track line
         temp.line().attr({
