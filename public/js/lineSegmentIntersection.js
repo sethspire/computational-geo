@@ -385,20 +385,6 @@ function checkIntersection(segment1, segment2, currentStates, states, eventQueue
     return intersectionLoc
 }
 
-// segment for sweep status
-class SegmentStatus {
-    constructor(segment) {
-        this.segment = segment
-        this.linearEq = getLineEquation(segment)
-        this.slope = this.linearEq[0]
-        this.y_int = this.linearEq[1]
-        this.sortVal = () => {
-            //console.log(this.slope)
-            return this.slope*(window.sweepX-0.00000000001) + this.y_int
-        }
-    }
-}
-
 // pseudocode
 const lineSweepCode = [
     "eventQueue= points sorted by x",
