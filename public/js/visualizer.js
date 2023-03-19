@@ -19,7 +19,7 @@ function updateDisplay(direction) {
 
         //update progress bar and code line
         updateProgressBar(stateList.curIteration, stateList.numIterations)
-        updateCodeLines(stateList.states[stateList.curIteration].codeLines)
+        updateCodeLines(stateList.states[stateList.curIteration].codeLines, stateList.states[stateList.curIteration].status)
 
         //update isPlaying if reached end
         if (stateList.curIteration === stateList.numIterations-1) {
@@ -43,7 +43,7 @@ function updateDisplay(direction) {
 
         //update progress bar
         updateProgressBar(stateList.curIteration, stateList.numIterations)
-        updateCodeLines(stateList.states[stateList.curIteration].codeLines)
+        updateCodeLines(stateList.states[stateList.curIteration].codeLines, stateList.states[stateList.curIteration].status)
     } else {
         //update progress bar
         updateProgressBar(stateList.curIteration, stateList.numIterations)
@@ -78,7 +78,7 @@ function updateProgressBar(curIter, numIter) {
     progressBar.setAttribute("max", numIter)
 }
 
-function updatePseudocodeText() {
+function initPseudocodeText() {
     let pseudocodeArea = document.querySelector("#pseudocode")
     stateList.pseudocode.forEach((code, i) => {
         let text = code.replaceAll(" ", "&nbsp")
@@ -89,17 +89,22 @@ function updatePseudocodeText() {
     })
 }
 
-function updateCodeLines(lineNumbers=[]) {
+function updateCodeLines(lineNumbers=[], status="") {
     // remove classes from children
     let pseudocodeArea = document.querySelector("#pseudocode")
     pseudocodeArea.children.forEach(child => {
         child.setAttribute("class", "")
     })
 
+    // add class to highlight lines
     lineNumbers.forEach(lineNum => {
         let line = document.querySelector(`#code${lineNum}`)
         line.setAttribute("class", "selected-line")
     })
+
+    // set code status
+    let codeStatus = document.querySelector("#codeStatus")
+    codeStatus.innerHTML = status
 }
 
 function toStart() {
@@ -152,4 +157,4 @@ document.querySelector("#media-playpause").onclick = playPause
 document.querySelector("#media-next").onclick = nextState
 document.querySelector("#media-to-end").onclick = toEnd
 
-export { updateDisplay, updatePseudocodeText }
+export { updateDisplay, initPseudocodeText }

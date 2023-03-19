@@ -1,6 +1,6 @@
 import { stateList, initStateList, createEdgeStateUpdatesFromPts, createPointStateUpdateFromPt, resetNewState } from "/js/stateList.js"
 import { points, resetStates} from "/js/graphEditor.js"
-import { updateDisplay, updatePseudocodeText } from "/js/visualizer.js"
+import { updateDisplay, initPseudocodeText } from "/js/visualizer.js"
 
 
 window.inputType = "point"
@@ -115,6 +115,7 @@ function grahamScan() {
     })
     newState.points.push(leftPointUpdate)
     newState.codeLines = [1]
+    newState.status = "check all points to find left-most one (top if tie)"
     states.push(newState)
 
     // get polar angle to left point
@@ -144,6 +145,7 @@ function grahamScan() {
         newState.edges.push(edgeUpdate)
     })
     newState.codeLines = [2]
+    newState.status = "find polar angle of each point relative to left point"
     states.push(newState)
 
     // sort points in counterclockwise fashion
@@ -166,6 +168,7 @@ function grahamScan() {
         newState.edges.push(edgeUpdate)
     })
     newState.codeLines = [3]
+    newState.status = "sort all points counter-clockwise by polar angle"
     states.push(newState)
 
     // add leftPoint to stack and add first two points to stack and hull
@@ -185,6 +188,7 @@ function grahamScan() {
         })
         newState.edges.push(edgeUpdate)
         newState.codeLines = [4]
+        newState.status = "add first two points, will be left (ccw) turn"
         states.push(newState)
 
         // push point to hullStack
@@ -206,6 +210,7 @@ function grahamScan() {
         })
         newState.edges.push(edgeUpdate)
         newState.codeLines = [6]
+        newState.status = "add next point to the current convex hull"
         states.push(newState)
 
         // WHILE TRUE
@@ -244,6 +249,7 @@ function grahamScan() {
                 })
                 newState.edges.push(edgeUpdate)
                 newState.codeLines = [8]
+                newState.status = "this new angle is a right/cw turn so NOT convex"
                 states.push(newState)
 
                 // SHOW NEW PATH
@@ -253,6 +259,7 @@ function grahamScan() {
                 })
                 newState.edges.push(edgeUpdate)
                 newState.codeLines = [9]
+                newState.status = "remove previous point from hull, connect hull"
                 states.push(newState)
 
                 // POP PREV POINT FROM STACK
@@ -271,6 +278,7 @@ function grahamScan() {
     })
     newState.edges.push(edgeUpdate)
     newState.codeLines = [10]
+    newState.status = "finish connection and convex hull is complete"
     states.push(newState)
 
     // set new states to stateList, update it, add pseudocode, update display
@@ -278,7 +286,7 @@ function grahamScan() {
     stateList.curIteration = -1
     stateList.numIterations = states.length
     stateList.pseudocode = grahamScanCode
-    updatePseudocodeText()
+    initPseudocodeText()
     updateDisplay("next")
     console.log("New Graham Scan")
 }

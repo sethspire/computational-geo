@@ -1,6 +1,6 @@
 import { stateList, reverseStates, initStateList, resetReverseStates, resetNewState, createEdgeStateUpdatesFromEdge, createPointStateUpdateFromPt, createVerticalEdgeStateUpdatesFromX, createPointStateUpdateFromCoord } from "/js/stateList.js"
 import { points, edges, resetStates } from "/js/graphEditor.js"
-import { updateDisplay } from "/js/visualizer.js"
+import { updateDisplay, initPseudocodeText } from "/js/visualizer.js"
 import { PriorityQueue, AVLTree } from "/js/helper.js";
 
 window.inputType = "segment"
@@ -30,9 +30,17 @@ function lineSweep() {
     let intersections = {}
     let comparisons = 0
 
-    // set first state to essentially blank
+    // set first state to essentially blank, show event queue
     let states = []
     let newState = resetNewState(currentStates)
+    newState.codeLines = [1]
+    newState.status = "eventQueue is priority queue of points, left to right"
+    states.push(newState)
+
+    // 2nd state also blank, show sweepStatus
+    newState = resetNewState(currentStates)
+    newState.codeLines = [2]
+    newState.status = "sweepStatus is binary search tree storing segments intersecting sweep line"
     states.push(newState)
 
     // place all endpoints in a priority queue
@@ -128,6 +136,8 @@ function lineSweep() {
                 "stroke": "orange",
                 "stroke-width": 3
             }))
+            newState.codeLines = [4, 5, 6]
+            newState.status = "event point is left endpoint, segment joins sweepStatus"
             states.push(newState)
 
             // get segment predecessor and successor
@@ -137,12 +147,12 @@ function lineSweep() {
             // check for intersection between new segment, predecessor, successor
             if (segmentPredNode) {
                 let segmentPred = segmentPredNode.item.segment
-                let intersectionLoc = checkIntersection(segment, segmentPred, currentStates, states, eventQueue, intersections)
+                let intersectionLoc = checkIntersection(segment, segmentPred, currentStates, states, eventQueue, intersections, "segmentAndAbove")
                 comparisons += 1
             }
             if (segmentSuccNode) {
                 let segmentSucc = segmentSuccNode.item.segment
-                let intersectionLoc = checkIntersection(segment, segmentSucc, currentStates, states, eventQueue, intersections)
+                let intersectionLoc = checkIntersection(segment, segmentSucc, currentStates, states, eventQueue, intersections, "segmentAndBelow")
                 comparisons += 1
             }              
         } else if (event["eventType"] === "right") {
@@ -154,6 +164,8 @@ function lineSweep() {
                 "stroke": "black",
                 "stroke-width": 1
             }))
+            newState.codeLines = [4, 9, 10]
+            newState.status = "event point is right endpoint, remove from sweepStatus"
             states.push(newState)
 
             // get segment predecessor and successor, then remove segment from AVL tree
@@ -165,11 +177,13 @@ function lineSweep() {
             if (segmentPredNode && segmentSuccNode) {
                 let segmentPred = segmentPredNode.item.segment
                 let segmentSucc = segmentSuccNode.item.segment
-                let intersectionLoc = checkIntersection(segmentPred, segmentSucc, currentStates, states, eventQueue, intersections)
+                let intersectionLoc = checkIntersection(segmentPred, segmentSucc, currentStates, states, eventQueue, intersections, "aboveAndBelow")
                 comparisons += 1
             }
         } else if (event["eventType"] === "intersection") {
             //console.log("FOUND INTER")
+            newState.codeLines = [4, 12, 13]
+            newState.status = "event point is intersection, swap the intersecting segments in sweepStatus"
             states.push(newState)
 
             // get segments
@@ -182,13 +196,13 @@ function lineSweep() {
             if (segmentStatusTop && segmentNodeBottomSucc) {
                 let segmentTop = segmentStatusTop.segment
                 let segmentBottomSucc = segmentNodeBottomSucc.item.segment
-                let intersectionLoc = checkIntersection(segmentTop, segmentBottomSucc, currentStates, states, eventQueue, intersections)
+                let intersectionLoc = checkIntersection(segmentTop, segmentBottomSucc, currentStates, states, eventQueue, intersections, "newBottomAndNeighbor")
                 comparisons += 1
             }
             if (segmentStatusBottom && segmentNodeTopPred) {
                 let segmentBottom = segmentStatusBottom.segment
                 let segmentTopPred = segmentNodeTopPred.item.segment
-                let intersectionLoc = checkIntersection(segmentBottom, segmentTopPred, currentStates, states, eventQueue, intersections)
+                let intersectionLoc = checkIntersection(segmentBottom, segmentTopPred, currentStates, states, eventQueue, intersections, "newTopAndNeighbor")
                 comparisons += 1
             }
 
@@ -202,6 +216,8 @@ function lineSweep() {
     stateList.states = states
     stateList.curIteration = -1
     stateList.numIterations = states.length
+    stateList.pseudocode = lineSweepCode
+    initPseudocodeText()
     updateDisplay("next")
     console.log("New Line Sweep")
     console.log(`Edges:${edgesList.length} ; Comparisons:${comparisons} ;  Brute Forces:${(edgesList.length*(edgesList.length-1))/2}`)
@@ -428,7 +444,7 @@ function getSegmentsIntersection(segment1, segment2){
 }
 
 // FUNCTION: test for intersection between 2 segments, add to states list
-function checkIntersection(segment1, segment2, currentStates, states, eventQueue, intersections) {
+function checkIntersection(segment1, segment2, currentStates, states, eventQueue, intersections, checkType) {
     let newState = resetNewState(currentStates)
     
     // make segments purple
@@ -484,6 +500,12 @@ function checkIntersection(segment1, segment2, currentStates, states, eventQueue
         }
 
         intersections[pointId] = true
+
+        newState.codeLines = checkTypes[checkType].foundLines
+        newState.status = checkTypes[checkType].foundStatus
+    } else {
+        newState.codeLines = checkTypes[checkType].notFoundLines
+        newState.status = checkTypes[checkType].notFoundStatus
     }
 
     states.push(newState)
@@ -502,6 +524,61 @@ class SegmentStatus {
             //console.log(this.slope)
             return this.slope*(window.sweepX-0.00000000001) + this.y_int
         }
+    }
+}
+
+// pseudocode
+const lineSweepCode = [
+    "eventQueue= points sorted by x",
+    "sweepStatus= binary tree of segments",
+    "while eventQueue is not empty:",
+    "  update sweep line",
+    "  if point is LEFT endpoint:",
+    "    add segment to sweepStatus",
+    "    check segment & segment above",
+    "    check segment & segment below",
+    "  if point is RIGHT endpoint:",
+    "    remove segment from sweepStatus",
+    "    check segments above & below",
+    "  if point is INTERSECTION:",
+    "    swap intersecting segments",
+    "    check new swap bottom & lower",
+    "    check new swap top & upper",
+    " ",
+    "function checkSegments:",
+    "  if segments intersect:",
+    "    add point to eventQueue"
+]
+const checkTypes = {
+    "segmentAndAbove": {
+        "foundStatus": "added segment and neighbor above intersect",
+        "notFoundStatus": "added segment and neighbor below DON'T intersect",
+        "foundLines": [7, 17, 18, 19],
+        "notFoundLines": [7, 17]
+    },
+    "segmentAndBelow": {
+        "foundStatus": "added segment and neighbor below intersect",
+        "notFoundStatus": "added segment and neighbor below DON'T intersect",
+        "foundLines": [8, 17, 18, 19],
+        "notFoundLines": [8, 17]
+    },
+    "aboveAndBelow": {
+        "foundStatus": "segments above and below removed point intersect",
+        "notFoundStatus": "segments above and below removed point DON'T intersect",
+        "foundLines": [11, 17, 18, 19],
+        "notFoundLines": [11, 17]
+    }, 
+    "newBottomAndNeighbor": {
+        "foundStatus": "segment swapped to bottom and new lower neighbor intersect",
+        "notFoundStatus": "segment swapped to bottom and new lower neighbor DON'T intersect",
+        "foundLines": [14, 17, 18, 19],
+        "notFoundLines": [14, 17]
+    },
+    "newTopAndNeighbor": {
+        "foundStatus": "segment swapped to top and new upper neighbor intersect",
+        "notFoundStatus": "segment swapped to top and new upper neighbor DON'T intersect",
+        "foundLines": [15, 17, 18, 19],
+        "notFoundLines": [15, 17]
     }
 }
 
