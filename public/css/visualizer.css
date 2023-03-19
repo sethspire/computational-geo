@@ -1,5 +1,5 @@
 :root {
-    --panel-width: 17.25em;
+    --panel-width: 18.75em;
 }
 
 
@@ -37,7 +37,7 @@ SIDE PANEL
 }
 /* panel buttons */
 #svg-change {
-    margin: 0.5em;
+    margin: 0.5em 0.5em 0 0.5em;
 }
 .panel-btn {
     display: inline-block;
@@ -60,7 +60,7 @@ SIDE PANEL
     color: var(--clr-background-medium);
 }
 #media-panel {
-    margin: 1em 0.5em;
+    margin: 0.5em 0.5em 0 0.5em;
 }
 .media-control {
     display: inline-block;
@@ -85,7 +85,7 @@ button > img {
 }
 .panel-selector {
     display: flex;
-    margin: 0.5em;
+    margin: 0 0.5em;
     font-family: Arial, Helvetica, sans-serif;
 }
 .panel-selector input[type="radio"] {
@@ -106,28 +106,32 @@ button > img {
     color: var(--clr-background-medium);
 }
 #algorithmsButtons {
-    margin: 0.5em;
+    margin: 0 0.5em;
 }
 /* algorithm and psuedocode status*/
 #algorithmStatus {
-    margin: 0.5em;
+    margin: 0 0.5em;
     border: 0.125em solid var(--clr-background-dark);
     border-radius: 1em;
     font-family: 'Courier New', Courier, monospace;
-    font-size: 0.75rem;
+    background-color: white;
 }
 #codeStatus {
-    height: 3em;
+    height: 4.5em;
     background-color: var(--clr-background-dark);
     border-radius: 0.8em 0.8em 0 0;
     color: white;
+    font-size: 0.75rem;
+    padding: 0 0.5em;
 }
 #pseudocode {
     min-height: 2em;
-    margin: 0.5em;
+    margin: 0.5em 0;
+    font-size: 0.6875rem;
 }
 #pseudocode > p {
-    margin: 0.125em 0;
+    padding: 0 0.5em;
+    margin: 0;
 }
 .selected-line {
     background-color: var(--clr-background-dark);

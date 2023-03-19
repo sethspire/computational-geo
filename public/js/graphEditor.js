@@ -399,6 +399,7 @@ function resetStates() {
     // re-initialize state list
     initStateList()
     document.querySelector("#pseudocode").innerHTML = null
+    document.querySelector("#codeStatus").innerHTML = null
 }
 
 // immediately run to create initial SVG
