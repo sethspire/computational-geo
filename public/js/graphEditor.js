@@ -628,6 +628,8 @@ function clearAll() {
 
         removeTempElements()
     }
+
+    initStateList()
 }
 
 // FUNCTION: reset to initial state
@@ -665,6 +667,8 @@ function resetStates(removeTemp=true) {
 
     // re-initialize state list
     initStateList()
+    document.querySelector("#pseudocode").innerHTML = null
+    document.querySelector("#codeStatus").innerHTML = null
 }
 
 // FUNCTION: remove the unused temporary elements used in creating elements
