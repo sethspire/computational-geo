@@ -442,7 +442,7 @@ const checkTypes = {
 
 // set onClick
 document.querySelector("#lineSweepBtn").onclick = lineSweep
-document.querySelector("#lineSweepEndpointsBtn").onclick = lineSweepEndpoints
+// document.querySelector("#lineSweepEndpointsBtn").onclick = lineSweepEndpoints
 
 // TODO
 // - in left event:

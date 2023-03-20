@@ -307,4 +307,4 @@ const grahamScanCode = [
 
 // set onClick
 document.querySelector("#grahamScanBtn").onclick = grahamScan
-document.querySelector("#trackPointsBtn").onclick = trackPoints
+// document.querySelector("#trackPointsBtn").onclick = trackPoints
