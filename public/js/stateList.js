@@ -18,7 +18,7 @@ function initStateList() {
 
 // FUNCTION: reset newState and include any resets needed
 function resetNewState(currentStates) {
-    let newState = {"points": [], "edges": [], "status": "", "codeLines": []}
+    let newState = {"points": [], "edges": [], "polygons": [], "status": "", "codeLines": []}
 
     if (reverseStates) {
         reverseStates["pointsFromPt"].forEach(pointReset => {
@@ -33,6 +33,10 @@ function resetNewState(currentStates) {
         reverseStates["edgesFromPts"].forEach(edgeReset => {
             newState.edges.push(createEdgeStateUpdatesFromPts(edgeReset["p1"], edgeReset["p2"], edgeReset["movement"], currentStates, edgeReset["attr"]))
         })
+        reverseStates["polygonsFromID"].forEach(polygonReset => {
+            console.log("reverse polygon")
+            newState.polygons.push(createPolygonStateUpdateFromPoints(polygonReset["points"], polygonReset["polygonID"], currentStates, polygonReset["attr"]))
+        })
     }
 
     resetReverseStates()
@@ -46,7 +50,8 @@ function resetReverseStates() {
         "pointsFromPt": [],
         "pointsFromCoord": [],
         "edgesFromEdge": [],
-        "edgesFromPts": []
+        "edgesFromPts": [],
+        "polygonsFromID": []
     }
 }
 
@@ -196,12 +201,14 @@ function createEdgeStateUpdatesFromPts(point1, point2, movement, currentStates, 
         }
 
         // store extended/retracted info
-        let edgeExtendedState = JSON.stringify(edgeUpdate.next)
-        let edgeRetractedState = JSON.stringify(edgeUpdate.prev)
-        edgeUpdate.prev["data-extended-state"] = edgeExtendedState
-        edgeUpdate.prev["data-retracted-state"] = edgeRetractedState
-        edgeUpdate.next["data-extended-state"] = edgeExtendedState
-        edgeUpdate.next["data-retracted-state"] = edgeRetractedState
+        if (movement === "retract" || movement === "extend") {
+            let edgeExtendedState = JSON.stringify(edgeUpdate.next)
+            let edgeRetractedState = JSON.stringify(edgeUpdate.prev)
+            edgeUpdate.prev["data-extended-state"] = edgeExtendedState
+            edgeUpdate.prev["data-retracted-state"] = edgeRetractedState
+            edgeUpdate.next["data-extended-state"] = edgeExtendedState
+            edgeUpdate.next["data-retracted-state"] = edgeRetractedState
+        }
 
         // store current state
         currentStates[id] = JSON.stringify(edgeUpdate.next)
@@ -289,4 +296,60 @@ function createEdgeStateUpdatesFromEdge(edge, currentStates, nextAttr) {
     }
 }
 
-export {stateList, reverseStates, initStateList, resetNewState, resetReverseStates, createPointStateUpdateFromPt, createEdgeStateUpdatesFromPts, createVerticalEdgeStateUpdatesFromX, createEdgeStateUpdatesFromEdge, createPointStateUpdateFromCoord }
+// FUNCTION: using points, create polygonUpdate JSON, get current state of edge if exists, update attributes, form new current state
+function createPolygonStateUpdateFromPoints(points, polygonID, currentStates, nextAttr) {
+    // get coordinates of each points, also save list of pointIDs
+    let coords = ""
+    let pointIDs = []
+    points.forEach(point => {
+        coords = coords.concat(`${point.attr("cx")},${point.attr("cy")} `)
+        pointIDs.push(point.attr("id"))
+    })
+
+    // search for edge, base form on that
+    console.log(points)
+    let polygon = currentStates[polygonID]
+    if (polygon) {
+        // polygon does already exist
+        let polygonUpdate = {
+            "id": polygonID, 
+            "prev": JSON.parse(currentStates[polygonID]),
+            "next": JSON.parse(currentStates[polygonID])
+        }
+        for (const [key, value] of Object.entries(nextAttr)) {
+            polygonUpdate.next[key] = value
+        }
+        polygonUpdate.next["points"] = coords
+        polygonUpdate.next["data-pointIDs"] = pointIDs
+        currentStates[polygonID] = JSON.stringify(polygonUpdate.next)
+
+        return polygonUpdate
+    } else {
+        // polygon does NOT already exist
+        let polygonUpdate = {
+            "id": polygonID, 
+            "prev": {
+                "points": coords,
+                "data-pointIDs": pointIDs,
+                "fill-opacity": 0,
+                "fill": "",
+            },
+            "next": {
+                "points": coords,
+                "data-pointIDs": pointIDs,
+                "fill-opacity": 1,
+                "fill": "black",
+            }
+        }
+        for (const [key, value] of Object.entries(nextAttr)) {
+            polygonUpdate.next[key] = value
+        }
+
+        // store current state
+        currentStates[polygonID] = JSON.stringify(polygonUpdate.next)
+
+        return polygonUpdate
+    }
+}
+
+export { stateList, reverseStates, initStateList, resetNewState, resetReverseStates, createPointStateUpdateFromPt, createEdgeStateUpdatesFromPts, createVerticalEdgeStateUpdatesFromX, createEdgeStateUpdatesFromEdge, createPointStateUpdateFromCoord, createPolygonStateUpdateFromPoints }

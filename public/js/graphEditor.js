@@ -11,6 +11,7 @@ window.svg_height = -1
 window.svg_width = -1
 
 let canvas = null
+let polygons = null
 let points = null
 let edges = null
 let boundary = null
@@ -35,9 +36,10 @@ function resizeSVG() {
 
     // create groups within SVG element for points, edges, and boundary
     boundary = canvas.group().attr("id", "boundary")
+    temp = canvas.group().attr("id", "temp")
+    polygons = canvas.group().attr("id", "polygons")
     edges = canvas.group().attr("id", "edges")
     points = canvas.group().attr("id", "points")
-    temp = canvas.group().attr("id", "temp")
 
     // add rectangles around edges for void area where cannot place points
     boundary.rect(voidSize+1, svg_height+1)
@@ -626,6 +628,9 @@ function clearAll() {
         let edgesList = edges.find('line')
         edgesList.remove()
 
+        let polygonsList = polygons.find('polygon')
+        polygonsList.remove()
+
         removeTempElements()
     }
 
@@ -651,12 +656,23 @@ function resetStates(removeTemp=true) {
 
     // remove edges if lack data-dontDelete
     let edgesList = edges.find('line')
-    edgesList.forEach(edge =>{
+    edgesList.forEach(edge => {
         if(edge.attr("data-dontDelete")) {
             let initialState = JSON.parse(edge.attr("data-init-state"))
             edge.attr(initialState)
         } else {
             edge.remove()
+        }
+    })
+
+    // remove polygons if lack data-dontDelete
+    let polygonsList = polygons.find("polygon")
+    polygonsList.forEach(polygon => {
+        if(polygon.attr("data-dontDelete")) {
+            let initialState = JSON.parse(polygon.attr("data-init-state"))
+            polygon.attr(initialState)
+        } else {
+            polygon.remove()
         }
     })
 
@@ -694,4 +710,4 @@ document.querySelector("#removeFromGraph").onclick = toggleGraphEdit
 document.querySelector("#lockGraph").onclick = toggleGraphEdit
 
 // export needed things
-export { canvas, points, edges, boundary, temp, resetStates }
+export { canvas, polygons, points, edges, boundary, temp, resetStates }
