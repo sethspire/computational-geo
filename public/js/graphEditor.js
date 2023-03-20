@@ -1,6 +1,6 @@
 // imports
 import { initStateList } from "/js/stateList.js"
-import { getEdgeId } from "/js/helper.js"
+import { getEdgeId, doIntersectFromPts, getSegmentIntersectionFromPts, doOverlapFromPts } from "/js/helper.js"
 
 // global variables
 const svgGraphMargin = 8
@@ -11,6 +11,7 @@ window.svg_height = -1
 window.svg_width = -1
 
 let canvas = null
+let polygons = null
 let points = null
 let edges = null
 let boundary = null
@@ -35,9 +36,10 @@ function resizeSVG() {
 
     // create groups within SVG element for points, edges, and boundary
     boundary = canvas.group().attr("id", "boundary")
+    temp = canvas.group().attr("id", "temp")
+    polygons = canvas.group().attr("id", "polygons")
     edges = canvas.group().attr("id", "edges")
     points = canvas.group().attr("id", "points")
-    temp = canvas.group().attr("id", "temp")
 
     // add rectangles around edges for void area where cannot place points
     boundary.rect(voidSize+1, svg_height+1)
@@ -61,7 +63,7 @@ function resizeSVG() {
     canvas.click(function (e) {
         handleClick(e)
     })
-    removeTempSegment()
+    removeTempElements()
 
     // log size and return svg canvas
     console.log("New SVG: " + svg_width + "w * " + svg_height + "h")
@@ -129,7 +131,6 @@ function addPoint(event) {
         newPoint.attr("data-init-state", pointInitialState)
 
         console.log("New Point: " + x + "x, " + y + "y")
-        resetStates()
 
         return newPoint
     } else {
@@ -145,7 +146,6 @@ function deletePoint() {
     
     if (hoveredCircle) {
         hoveredCircle.remove()
-        resetStates()
     } else {
         console.log("There is no point to remove at this location")
     }
@@ -260,12 +260,244 @@ function deleteSegment() {
     }
 }
 
-function removeTempSegment() {
-    canvas.off("mousemove")
-    let tempPoint = temp.findOne("circle")
-    if (tempPoint) { tempPoint.remove() }
-    let tempEdge = temp.findOne("line")
-    if (tempEdge) { tempEdge.remove() }
+// FUNCTION: add point to simple polygon
+function addPolygonPoint_simple(event) {
+    let allPoints = points.find("circle")
+    let prevPoint = null
+    if (allPoints.length >= 1) {
+        prevPoint = allPoints[allPoints.length-1]
+    }
+    let newPoint = addPoint(event)
+
+    if (newPoint) {
+        // check if new points would cause any intersection
+        let foundIntersection = false
+        if (allPoints.length >= 2) {
+            let edgeList = edges.find("line")
+
+            // make sure new line isn't parallel and overlapping with previously added edge
+            let prevEdge = edgeList.pop()
+            let segmentId = prevEdge.attr("id")
+            let segmentPointIDs = segmentId.split("_").slice(1,3)
+            let p2 = points.findOne(`[id=${segmentPointIDs[0]}]`)
+            let q2 = points.findOne(`[id=${segmentPointIDs[1]}]`)
+            if (doOverlapFromPts(prevPoint, newPoint, p2, q2)) {
+                foundIntersection = true
+            }
+
+            edgeList.forEach(edge => {
+                segmentId = edge.attr("id")
+                segmentPointIDs = segmentId.split("_").slice(1,3)
+                p2 = points.findOne(`[id=${segmentPointIDs[0]}]`)
+                q2 = points.findOne(`[id=${segmentPointIDs[1]}]`)
+                foundIntersection = doIntersectFromPts(prevPoint, newPoint, p2, q2) || foundIntersection
+            })
+        }
+
+        if (!foundIntersection){
+            // add new line segment from prev point to new point
+            if (prevPoint) {
+                let id = getEdgeId(prevPoint, newPoint)
+                let newEdge = edges.line()
+                    .attr({
+                        "x1": prevPoint.attr("cx"),
+                        "y1": prevPoint.attr("cy"),
+                        "x2": newPoint.attr("cx"),
+                        "y2": newPoint.attr("cy"),
+                        "stroke": "black",
+                        "data-dontDelete": true,
+                        "id": id
+                    })
+                
+                // set init state data for edge
+                let edgeInitialState = JSON.stringify(newEdge.attr())
+                newEdge.attr("data-init-state", edgeInitialState)
+
+                // set this segment id to the data attributes of the endpoints
+                newPoint.attr("data-segmentID_prev", id)
+                prevPoint.attr("data-segmentID_next", id)
+            }
+
+            addPolygonTempLines_simple()            
+        } else {
+            newPoint.remove()
+        }
+    }
+}
+
+// FUNCTION add track line and temp line for simple polygon
+function addPolygonTempLines_simple() {
+    // get all points and most recent point
+    let allPoints = points.find("circle")
+    let newPoint = allPoints[allPoints.length-1]
+
+    // show where completing line would be
+    if (allPoints.length > 2) {
+        let testLine = temp.findOne("line[id=testLine]")
+        if (testLine) {
+            testLine.remove()
+        }
+
+        // get first point
+        let firstPoint = allPoints[0]
+
+        // check if estimated new line intersects anything
+        let foundIntersection = false
+        let edgeList = edges.find("line")
+        edgeList.pop()
+        edgeList.shift()
+        edgeList.forEach(edge => {
+            let segmentId = edge.attr("id")
+            let segmentPointIDs = segmentId.split("_").slice(1,3)
+            let p2 = points.findOne(`[id=${segmentPointIDs[0]}]`)
+            let q2 = points.findOne(`[id=${segmentPointIDs[1]}]`)
+            foundIntersection = doIntersectFromPts(firstPoint, newPoint, p2, q2) || foundIntersection
+        })
+
+        // set stroke color based on if intersects
+        let strokeColor = foundIntersection ? "red" : "lime"
+
+        // add temp track line
+        temp.line().attr({
+            "x1": newPoint.attr("cx"),
+            "y1": newPoint.attr("cy"),
+            "x2": firstPoint.attr("cx"),
+            "y2": firstPoint.attr("cy"),
+            "stroke": strokeColor,
+            "stroke-dasharray": "5 5",
+            "id": "testLine"
+        })
+    }
+
+    // remove old temp line
+    let trackLine = temp.findOne("line[id=trackLine]")
+    if (trackLine) {
+        trackLine.remove()
+    }
+
+    // create temp line to move with mouse
+    temp.line()
+        .attr({
+            "x1": newPoint.attr("cx"),
+            "y1": newPoint.attr("cy"),
+            "x2": newPoint.attr("cx"),
+            "y2": newPoint.attr("cy"),
+            "stroke": "black",
+            "stroke-dasharray": "5 5",
+            "id": "trackLine"
+        })
+
+    // add event listener moving temp line
+    canvas.on('mousemove', function(event) {
+        let trackEdge = temp.findOne("line[id=trackLine]")
+        trackEdge.attr({
+            "x2": event.offsetX,
+            "y2": event.offsetY
+        })
+    })
+}
+
+// FUNCTION delete point or edge form simple polygon
+function deletePolygonElement_simple() {
+    // check if hovering over any point
+    let hoveredCircle = points.findOne('circle:hover')
+    let hoveredEdge = edges.findOne('line:hover')
+    
+    if (hoveredCircle) {
+        // get prev and next segments relative to point if they exist
+        let segmentID_prev = hoveredCircle.attr("data-segmentID_prev")
+        let segmentID_next = hoveredCircle.attr("data-segmentID_next")
+        let prevSegment = null
+        let nextSegment = null
+        if (segmentID_prev) {
+            prevSegment = edges.findOne(`[id=${segmentID_prev}]`)
+        }
+        if (segmentID_next) {
+            nextSegment = edges.findOne(`[id=${segmentID_next}]`)
+        }
+
+        // if have both prev and next, make prev segment go to next point, del next segment and hovered point
+        if (prevSegment && nextSegment) {
+            // get the other points associated with the prev segment and next segment
+            let prevPointIDs = segmentID_prev.split("_").slice(1, 3)
+            let prevPointID = prevPointIDs[0] === hoveredCircle.attr("id") ? prevPointIDs[1] : prevPointIDs[0]
+            let prevPoint = points.findOne(`[id=${prevPointID}`)
+            let nextPointIDs = segmentID_next.split("_").slice(1, 3)
+            let nextPointID = nextPointIDs[0] === hoveredCircle.attr("id") ? nextPointIDs[1] : nextPointIDs[0]
+            let nextPoint = points.findOne(`[id=${nextPointID}`)
+
+            // check if estimated new line intersects anything
+            let foundIntersection = false
+            let edgeList = edges.find("line")
+            edgeList.forEach(edge => {
+                let segmentId = edge.attr("id")
+                let segmentPointIDs = segmentId.split("_").slice(1,3)
+                let p2 = points.findOne(`[id=${segmentPointIDs[0]}]`)
+                let q2 = points.findOne(`[id=${segmentPointIDs[1]}]`)
+                let intersectionPt = getSegmentIntersectionFromPts(prevPoint, nextPoint, p2, q2)
+                if (intersectionPt && doIntersectFromPts(prevPoint, nextPoint, p2, q2) &&
+                    JSON.stringify(intersectionPt) !== JSON.stringify([Number(prevPoint.attr("cx")), Number(prevPoint.attr("cy"))]) && 
+                    JSON.stringify(intersectionPt) !== JSON.stringify([Number(nextPoint.attr("cx")), Number(nextPoint.attr("cy"))])) {
+                        foundIntersection = true
+                }
+            })
+
+            if (!foundIntersection) {
+                // update prev segment
+                let id = getEdgeId(prevPoint, nextPoint)
+                prevSegment.attr({
+                    "x2": nextPoint.attr("cx"),
+                    "y2": nextPoint.attr("cy"),
+                    "id": id,
+                    "data-init-state": null
+                })
+                let edgeInitialState = JSON.stringify(prevSegment.attr())
+                prevSegment.attr("data-init-state", edgeInitialState)
+
+                // update prev and next point
+                nextPoint.attr({
+                    "data-segmentID_prev": id
+                })
+                prevPoint.attr({
+                    "data-segmentID_next": id
+                })
+
+                // delete old
+                nextSegment.remove()
+                hoveredCircle.remove()
+            }
+        } else if (prevSegment) {
+            // delete hovered point and prev segment
+            hoveredCircle.remove()
+            prevSegment.remove()
+
+            // get the other points of the prev segment, update it
+            let prevPointIDs = segmentID_prev.split("_").slice(1, 3)
+            let prevPointID = prevPointIDs[0] === hoveredCircle.attr("id") ? prevPointIDs[1] : prevPointIDs[0]
+            let prevPoint = points.findOne(`[id=${prevPointID}`)
+            prevPoint.attr({
+                "data-segmentID_next": null
+            })
+        } else if (nextSegment) {
+            // delete hovered point and prev segment
+            hoveredCircle.remove()
+            nextSegment.remove()
+
+            // get the other points of the prev segment, update it
+            let nextPointIDs = segmentID_next.split("_").slice(1, 3)
+            let nextPointID = nextPointIDs[0] === hoveredCircle.attr("id") ? nextPointIDs[1] : nextPointIDs[0]
+            let nextPoint = points.findOne(`[id=${nextPointID}`)
+            nextPoint.attr({
+                "data-segmentID_prev": null
+            })
+        } else {
+            hoveredCircle.remove()
+        }
+    } else if (hoveredEdge) {
+
+    } else {
+        console.log("There is no segment to remove at this location")
+    }
 }
 
 // FUNCTION: handle click
@@ -273,14 +505,20 @@ function handleClick(event) {
     let selectedBtn = document.querySelector('input[name="graphEdit"]:checked').value
 
     if (selectedBtn === "removeFromGraph") {
+        resetStates()
+
         if (inputType === "point") {
             deletePoint()
         } else if (inputType === "segment") {
             deleteSegment()
+        } else if (inputType === "polygon-simple") {
+            deletePolygonElement_simple()
         }
     }
 
     if (selectedBtn === "addToGraph") {
+        resetStates(false)
+
         if (inputType === "point") {
             addPoint(event)
         } else if(inputType === "segment") {
@@ -289,6 +527,8 @@ function handleClick(event) {
             } else {
                 addSegmentStart(event)
             }
+        } else if(inputType === "polygon-simple") {
+            addPolygonPoint_simple(event)
         }
     }
 }
@@ -323,7 +563,7 @@ function toggleGraphEdit() {
         let pointsList = points.find('circle')
 
         if (selectedBtn === "removeFromGraph") {
-            removeTempSegment()
+            removeTempElements()
 
             pointsList.each(function(point) {
                 point.addClass("svg-point-remove")
@@ -337,7 +577,35 @@ function toggleGraphEdit() {
                 point.attr("stroke-width", pointSize*4)
             })
         } else if (selectedBtn === "lockGraph") {
-            removeTempSegment()
+            removeTempElements()
+
+            pointsList.each(function(point) {
+                point.addClass("svg-point-add")
+                point.removeClass("svg-point-remove")
+                point.attr("stroke-width", pointSize*4)
+            })
+        }
+    } else if (inputType === "polygon-simple") {
+        let pointsList = points.find('circle')
+
+        if (selectedBtn === "removeFromGraph") {
+            removeTempElements()
+
+            pointsList.each(function(point) {
+                point.addClass("svg-point-remove")
+                point.removeClass("svg-point-add")
+                point.attr("stroke-width", pointSize*2)
+            })
+        } else if (selectedBtn === "addToGraph") {
+            addPolygonTempLines_simple()
+
+            pointsList.each(function(point) {
+                point.addClass("svg-point-add")
+                point.removeClass("svg-point-remove")
+                point.attr("stroke-width", pointSize*4)
+            })
+        } else if (selectedBtn === "lockGraph") {
+            removeTempElements()
 
             pointsList.each(function(point) {
                 point.addClass("svg-point-add")
@@ -360,14 +628,17 @@ function clearAll() {
         let edgesList = edges.find('line')
         edgesList.remove()
 
-        removeTempSegment()
+        let polygonsList = polygons.find('polygon')
+        polygonsList.remove()
+
+        removeTempElements()
     }
 
     initStateList()
 }
 
 // FUNCTION: reset to initial state
-function resetStates() {
+function resetStates(removeTemp=true) {
     // reset points to initial state
     let pointsList = points.find('circle')
     pointsList.forEach(point => {
@@ -385,21 +656,46 @@ function resetStates() {
 
     // remove edges if lack data-dontDelete
     let edgesList = edges.find('line')
-    edgesList.forEach(edge =>{
+    edgesList.forEach(edge => {
         if(edge.attr("data-dontDelete")) {
-            
+            let initialState = JSON.parse(edge.attr("data-init-state"))
+            edge.attr(initialState)
         } else {
             edge.remove()
         }
     })
 
+    // remove polygons if lack data-dontDelete
+    let polygonsList = polygons.find("polygon")
+    polygonsList.forEach(polygon => {
+        if(polygon.attr("data-dontDelete")) {
+            let initialState = JSON.parse(polygon.attr("data-init-state"))
+            polygon.attr(initialState)
+        } else {
+            polygon.remove()
+        }
+    })
+
     //remove temp stuff
-    removeTempSegment()
+    if (removeTemp) {
+        removeTempElements()
+    }
 
     // re-initialize state list
     initStateList()
     document.querySelector("#pseudocode").innerHTML = null
     document.querySelector("#codeStatus").innerHTML = null
+}
+
+// FUNCTION: remove the unused temporary elements used in creating elements
+function removeTempElements() {
+    canvas.off("mousemove")
+
+    let tempPoint = temp.find("circle")
+    if (tempPoint) { tempPoint.remove() }
+    
+    let tempEdge = temp.find("line")
+    if (tempEdge) { tempEdge.remove() }
 }
 
 // immediately run to create initial SVG
@@ -414,4 +710,4 @@ document.querySelector("#removeFromGraph").onclick = toggleGraphEdit
 document.querySelector("#lockGraph").onclick = toggleGraphEdit
 
 // export needed things
-export { canvas, points, edges, boundary, temp, resetStates }
+export { canvas, polygons, points, edges, boundary, temp, resetStates }

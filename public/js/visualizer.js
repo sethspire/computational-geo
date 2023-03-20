@@ -1,41 +1,55 @@
 // imports
 import { stateList } from "/js/stateList.js"
-import { points, edges } from "/js/graphEditor.js"
+import { points, edges, polygons } from "/js/graphEditor.js"
 
 function updateDisplay(direction) {
     if (direction === "next" && stateList.curIteration < stateList.numIterations-1) {
         //increment curIteration
         stateList.curIteration += 1
+        let curState = stateList.states[stateList.curIteration]
 
         //update points
-        stateList.states[stateList.curIteration].points.forEach(pointData => {
+        curState.points.forEach(pointData => {
             updatePoint(pointData, direction)
         })
 
         //update edges
-        stateList.states[stateList.curIteration].edges.forEach(edgeData => {
+        curState.edges.forEach(edgeData => {
             updateEdge(edgeData, direction)
+        })
+
+        //update polygons
+        curState.polygons.forEach(polygonData => {
+            updatePolygon(polygonData, direction)
         })
 
         //update progress bar and code line
         updateProgressBar(stateList.curIteration, stateList.numIterations)
-        updateCodeLines(stateList.states[stateList.curIteration].codeLines, stateList.states[stateList.curIteration].status)
+        updateCodeLines(curState.codeLines, curState.status)
 
         //update isPlaying if reached end
         if (stateList.curIteration === stateList.numIterations-1) {
             stateList.isPlaying = false
         }
     } else if (direction === "prev"  && stateList.curIteration > 0) {
+        let curState = stateList.states[stateList.curIteration]
+
         //update points
-        let reversePoints = (stateList.states[stateList.curIteration].points).map((x) => x).reverse()
+        let reversePoints = (curState.points).map((x) => x).reverse()
         reversePoints.forEach(pointData => {
             updatePoint(pointData, direction)
         })
 
         //update edges
-        let reverseEdges = (stateList.states[stateList.curIteration].edges).map((x) => x).reverse()
+        let reverseEdges = (curState.edges).map((x) => x).reverse()
         reverseEdges.forEach(edgeData => {
             updateEdge(edgeData, direction)
+        })
+
+        //update polygons
+        let reversePolygons = (curState.polygons).map((x) => x).reverse()
+        reversePolygons.forEach(polygonData => {
+            updatePolygon(polygonData, direction)
         })
 
         //decrement curIteration
@@ -69,6 +83,17 @@ function updateEdge(edgeData, direction) {
         edges.line()
             .attr(edgeData[direction])
             .attr("id", edgeData.id)
+    }
+}
+
+function updatePolygon(polygonData, direction) {
+    let polygon = polygons.findOne(`[id=${polygonData.id}]`)
+    if (polygon) {
+        polygon.attr(polygonData[direction])
+    } else {
+        polygons.polygon()
+            .attr(polygonData[direction])
+            .attr("id", polygonData.id)
     }
 }
 
