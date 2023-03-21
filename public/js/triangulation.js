@@ -80,7 +80,7 @@ function earClip() {
     let prevPolarAngle =  Math.atan2((-1)*prevPoint.attr("cy") - (-1)*leftPoint.attr("cy"), prevPoint.attr("cx") - leftPoint.attr("cx"))* 180 / Math.PI
     let nextPolarAngle =  Math.atan2((-1)*nextPoint.attr("cy") - (-1)*leftPoint.attr("cy"), nextPoint.attr("cx") - leftPoint.attr("cx"))* 180 / Math.PI
     if (prevPolarAngle < nextPolarAngle) {
-        pointsList.map((x) => x).reverse()
+        pointsList = (new  SVG.Array(pointsList)).reverse()
     }
 
     // get convex points and reflex points

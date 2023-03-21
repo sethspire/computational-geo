@@ -34,7 +34,6 @@ function resetNewState(currentStates) {
             newState.edges.push(createEdgeStateUpdatesFromPts(edgeReset["p1"], edgeReset["p2"], edgeReset["movement"], currentStates, edgeReset["attr"]))
         })
         reverseStates["polygonsFromID"].forEach(polygonReset => {
-            console.log("reverse polygon")
             newState.polygons.push(createPolygonStateUpdateFromPoints(polygonReset["points"], polygonReset["polygonID"], currentStates, polygonReset["attr"]))
         })
     }
@@ -307,7 +306,6 @@ function createPolygonStateUpdateFromPoints(points, polygonID, currentStates, ne
     })
 
     // search for edge, base form on that
-    console.log(points)
     let polygon = currentStates[polygonID]
     if (polygon) {
         // polygon does already exist
