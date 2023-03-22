@@ -86,6 +86,7 @@ class AVLTree {
 
     // return True if <i> is greater, False if <j> is
     greater(i, j) {
+        console.log(i.segment.node, i["sortVal"](), j.segment.node, j["sortVal"]())
         return this._comparator(i, j)
     }
 
@@ -271,13 +272,14 @@ class AVLTree {
     preOrder() {
         console.log("AVL Tree Pre-Order:")
         this.preOrderHelper(this._root)
+        console.log(" ")
     }
 
     // in-order helper
     inOrderHelper(node) {
         if (node) {
             this.inOrderHelper(node.left)
-            console.log(node.item)
+            console.log(node.item.segment.node, node.item)
             this.inOrderHelper(node.right)
         }
     }
@@ -286,10 +288,12 @@ class AVLTree {
     inOrder() {
         console.log("AVL Tree In-Order:")
         this.inOrderHelper(this._root)
+        console.log(" ")
     }
 
     // get node predecessor
     findPredecessor(item) {
+        this.inOrder()
         // base case
         let root = this._root
         if (!root) {
@@ -449,8 +453,14 @@ class SegmentStatus {
         this.slope = this.linearEq[0]
         this.y_int = this.linearEq[1]
         this.sortVal = () => {
-            //console.log(this.slope)
-            return this.slope*(window.sweepX-0.00000000001) + this.y_int
+            if (this.slope === -Infinity || this.y_int === Infinity) {
+                if (window.prevSweepX === window.sweepX) {
+                    return (window.prevSweepY + window.sweepY) / 2
+                } else {
+                    return (window.sweepY)
+                }
+            }
+            return this.slope*(window.sweepX-0.0000000000001) + this.y_int
         }
     }
 }

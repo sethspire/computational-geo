@@ -64,8 +64,12 @@ function lineSweep() {
         })
     })
 
-    // set sweep status ordered dictionary
+    // set sweep status ordered dictionary, set sweepX and sweep y
     let sweepStatus = new AVLTree((a, b) => a["sortVal"]() > b["sortVal"]())
+    window.prevSweepX = -1
+    window.prevSweepY = -1
+    window.sweepX = -1
+    window.sweepY = -1
 
     // go event point by event point
     while (!eventQueue.isEmpty()) {
@@ -76,10 +80,15 @@ function lineSweep() {
         let event = eventQueue.pop()
         let point = event["point"]
         let pointLoc = event["pointLoc"]
+        console.log(" ")
+        console.log("event", point, pointLoc)
 
         // update sweepX and event point based on values
         if (point) {
+            window.prevSweepX = window.sweepX
+            window.prevSweepY = window.sweepY
             window.sweepX = point.attr("cx")
+            window.sweepY = point.attr("cy")
 
             // get point ID
             let pointID = point.attr("id")
@@ -97,8 +106,10 @@ function lineSweep() {
             })
         }
         if (pointLoc) {
-            console.log(pointLoc)
+            window.prevSweepX = window.sweepX
+            window.prevSweepY = window.sweepY
             window.sweepX = pointLoc[0]
+            window.sweepY = pointLoc[1]
 
             // get point ID
             let x = Math.round(pointLoc[0])
@@ -127,7 +138,7 @@ function lineSweep() {
         
         // different things to check based on event type
         if (event["eventType"] === "left") {
-            //console.log("FOUND LEFT")
+            console.log("LEFT EVENT")
             // add segment to sweepStatus
             let segment = edges.findOne(`[id=${point.attr("data-segmentID")}]`)
             let segmentStatus = new SegmentStatus(segment)
@@ -141,6 +152,7 @@ function lineSweep() {
             states.push(newState)
 
             // get segment predecessor and successor
+            //sweepStatus.inOrder()
             let segmentPredNode = sweepStatus.findPredecessor(segmentStatus)
             let segmentSuccNode = sweepStatus.findSuccessor(segmentStatus)
 
@@ -156,7 +168,7 @@ function lineSweep() {
                 comparisons += 1
             }              
         } else if (event["eventType"] === "right") {
-            //console.log("FOUND RIGHT")
+            console.log("RIGHT EVENT")
             // add segment to sweepStatus
             let segment = edges.findOne(`[id=${point.attr("data-segmentID")}]`)
             let segmentStatus = new SegmentStatus(segment)
@@ -173,6 +185,7 @@ function lineSweep() {
             let segmentSuccNode = sweepStatus.findSuccessor(segmentStatus)
             sweepStatus.deleteNode(segmentStatus)
 
+            //sweepStatus.inOrder()
             // check for intersection between predecessor and successor
             if (segmentPredNode && segmentSuccNode) {
                 let segmentPred = segmentPredNode.item.segment
@@ -181,7 +194,7 @@ function lineSweep() {
                 comparisons += 1
             }
         } else if (event["eventType"] === "intersection") {
-            //console.log("FOUND INTER")
+            console.log("INTER EVENT")
             newState.codeLines = [4, 12, 13]
             newState.status = "event point is intersection, swap the intersecting segments in sweepStatus"
             states.push(newState)
@@ -191,7 +204,7 @@ function lineSweep() {
             let segmentNodeTopPred = sweepStatus.findPredecessor(segmentStatusTop)
             let segmentStatusBottom = event.segments[1]
             let segmentNodeBottomSucc = sweepStatus.findSuccessor(segmentStatusBottom)
-
+            //sweepStatus.inOrder()
             // check for intersection between top and bottom succ; bottom and top pred
             if (segmentStatusTop && segmentNodeBottomSucc) {
                 let segmentTop = segmentStatusTop.segment
@@ -205,7 +218,7 @@ function lineSweep() {
                 let intersectionLoc = checkIntersection(segmentBottom, segmentTopPred, currentStates, states, eventQueue, intersections, "newTopAndNeighbor")
                 comparisons += 1
             }
-
+            
             // swap segment top and segment bottom
             sweepStatus.swapSuccessor(segmentStatusTop)
         }
@@ -341,6 +354,7 @@ function checkIntersection(segment1, segment2, currentStates, states, eventQueue
 
     // check for intersection
     let intersectionLoc = getSegmentsIntersection(segment1, segment2)
+    console.log(segment1.node, segment2.node, intersectionLoc)
     let pointId = `p${intersectionLoc[0]}-${intersectionLoc[1]}`
     if (doIntersect(segment1, segment2) && intersectionLoc) {
         //console.log("Intersection:", intersectionLoc, segment1.node, segment2.node)
