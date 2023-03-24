@@ -86,7 +86,6 @@ class AVLTree {
 
     // return True if <i> is greater, False if <j> is
     greater(i, j) {
-        console.log(i.segment.node, i["sortVal"](), j.segment.node, j["sortVal"]())
         return this._comparator(i, j)
     }
 
@@ -293,7 +292,6 @@ class AVLTree {
 
     // get node predecessor
     findPredecessor(item) {
-        this.inOrder()
         // base case
         let root = this._root
         if (!root) {
@@ -453,14 +451,10 @@ class SegmentStatus {
         this.slope = this.linearEq[0]
         this.y_int = this.linearEq[1]
         this.sortVal = () => {
-            if (this.slope === -Infinity || this.y_int === Infinity) {
-                if (window.prevSweepX === window.sweepX) {
-                    return (window.prevSweepY + window.sweepY) / 2
-                } else {
-                    return (window.sweepY)
-                }
+            if (this.slope === Infinity) {
+                return Number((window.sweepY).toFixed(9))
             }
-            return this.slope*(window.sweepX-0.0000000000001) + this.y_int
+            return Number((this.slope*(window.sweepX) + this.y_int).toFixed(10))
         }
     }
 }
@@ -479,6 +473,10 @@ function getLineEquation(segment) {
 
     let slope = (y1-y2)/(x1-x2)
     let y_int = (x1*y2 - y1*x2)/(x1-x2)
+
+    if (slope === -Infinity) {
+        slope = Infinity
+    }
 
     return [slope, y_int]
 }
