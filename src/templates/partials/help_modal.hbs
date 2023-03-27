@@ -1,0 +1,32 @@
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Quick Help Guide</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Welcome! This page serves to give you the ability to interact with some algorithms in the field of computational geometry.</p>
+                <p>NOTE: THIS WAS DEVELOPED FOR LARGER HORIZONTAL SCREENS, BUT ROTATING YOUR MOBILE DEVICE SHOULD ALLOW FOR RELATIVELY SIMPLE USAGE.</p>
+                <br>
+                <p>In the panel to left are buttons to allow you to interact with the visualization. The first 3 buttons allow you to RESIZE the white SVG canvas to fit the available screen area, to CLEAR all of the current elements on the canvas, and to make the window FULL screen.</p>
+                <p>To add elements, simply click or tap on the large white area. Depending on the problem and algorithm, a tap may add a single point, the endpoint of a line segment, or a new point on a polygon.</p>
+                <p>The 3-way toggle on the upper left next to FULL allows you to decide if a click ADDS an element to the canvas, DELETES an element from the canvas, or LOCKS the canvas so a click does nothing.</p>
+                <p>The QUESTION MARK will reopen this help guide when pressed.</p>
+                <br>
+                <p>In the second row of buttons on the panel are the algorithm(s) to solve the problem at hand. Clicking the button will run the algorithm and save the state of the visualization throughout.</p>
+                <p>The media control buttons then allow for the running of the visualization to be toggled. The 5 buttons allow the user to SKIP TO BEGINNING, to GO TO PREVIOUS, to PLAY/PAUSE, to GO TO NEXT, and to SKIP TO END. The progress bar below that shows how far into the algorithm the visualization is.</p>
+                <br>
+                <p>When an algorithm is run, the pseudocode will populate below in the panel. It essentially shows the general steps of the algorithm without getting into to many specific details of how the algorithm is implemented. As the visualization goes, it will highlight the matching lines of pseudocode for each step in the visualization. In the green area above the pseudocode will be a line of text giving a greater description of that step in the algorithm.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script defer>
+    var myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
+        keyboard: false
+    })
+    myModal.show()
+</script>
