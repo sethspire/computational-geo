@@ -65,7 +65,7 @@ function updateDisplay(direction) {
 }
 
 function updatePoint(pointData, direction) {
-    let point = points.findOne(`[id=${pointData.id}]`)
+    let point = points.findOne(`[id='${pointData.id}']`)
     if (point) {
         point.attr(pointData[direction])
     } else {
@@ -76,7 +76,7 @@ function updatePoint(pointData, direction) {
 }
 
 function updateEdge(edgeData, direction) {
-    let edge = edges.findOne(`[id=${edgeData.id}]`)
+    let edge = edges.findOne(`[id='${edgeData.id}']`)
     if (edge) {
         edge.attr(edgeData[direction])
     } else {
@@ -87,7 +87,7 @@ function updateEdge(edgeData, direction) {
 }
 
 function updatePolygon(polygonData, direction) {
-    let polygon = polygons.findOne(`[id=${polygonData.id}]`)
+    let polygon = polygons.findOne(`[id='${polygonData.id}']`)
     if (polygon) {
         polygon.attr(polygonData[direction])
     } else {
