@@ -75,7 +75,22 @@ function lineSweep() {
     })
 
     // set sweep status ordered dictionary, set sweepX and sweep y
-    let sweepStatus = new AVLTree((a, b) => a["sortVal"]() > b["sortVal"]())
+    //let sweepStatus = new AVLTree((a, b) => a["sortVal"]() > b["sortVal"]())
+    let sweepStatus = new AVLTree((a, b) => {
+        if (a["sortVal"]() > b["sortVal"]()) {
+            // return true if a has the greater sort value, else false
+            console.log(a.segment.node, b.segment.node, a["sortVal"](), "greater than", b["sortVal"]())
+            return true
+        } else if(a["sortVal"]() === b["sortVal"]()) {
+            // if sort values are equal, return true if a has smaller slope, else false
+            console.log(a.segment.node, b.segment.node, a["slope"], b["slope"], a["slope"] < b["slope"])
+            return a["slope"] < b["slope"]
+        } else {
+            // else (if b has greater slope), return false
+            console.log(a.segment.node, b.segment.node, a["sortVal"](), "less than", b["sortVal"]())
+            return false
+        }
+    })
     window.prevSweepX = -1
     window.prevSweepY = -1
     window.sweepX = -1

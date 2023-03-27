@@ -434,6 +434,7 @@ class AVLTree {
 
     // swap with immediate successor
     swapSuccessor(item) {
+        console.log("*ITEM TO SWAP WITH SUCC*", item)
         let current = this.findNode(item)
         let successor = this.findSuccessor(item)
 
@@ -597,7 +598,6 @@ function getSegmentIntersectionFromPts(A, B, C, D) {
         return [x, y];
     }
 }
-
 
 // FUNCTION: get intersection of 2 lines based on endpoints coordinates of 2 segments
 function getSegmentIntersectionFromCoord(A, B, C, D) {
