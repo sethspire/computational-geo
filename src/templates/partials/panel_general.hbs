@@ -9,18 +9,20 @@
 
             <button class="panel-btn" title="Clear All Elements" id="clearAll">CLEAR</button>
 
-            <button class="panel-btn" title="Toggle Full-Screen Mode" id="fullscreenToggle">FULL SCREEN</button>
-        </div>
+            <button class="panel-btn" title="Toggle Full-Screen Mode" id="fullscreenToggle">FULL</button>
 
-        <div class="panel-selector">
-            <input type="radio" name="graphEdit" id="addToGraph" value="addToGraph" checked>
-            <label  title="Add To Graph" class="selector-left" for="addToGraph">✎</label>
-            
-            <input type="radio" name="graphEdit" id="removeFromGraph" value="removeFromGraph">
-            <label for="removeFromGraph" title="Remove From Graph">╳</label>
+            <div class="panel-selector-wrap">
+                <div class="panel-selector">
+                    <input type="radio" name="graphEdit" id="addToGraph" value="addToGraph" checked>
+                    <label  title="Add To Graph" class="selector-left" for="addToGraph">✎</label>
+                    
+                    <input type="radio" name="graphEdit" id="removeFromGraph" value="removeFromGraph">
+                    <label for="removeFromGraph" title="Remove From Graph">╳</label>
 
-            <input type="radio" name="graphEdit" id="lockGraph" value="lockGraph">
-            <label class="selector-right" title="Lock Graph - Clicks Do Nothing" for="lockGraph">&#128274</label>
+                    <input type="radio" name="graphEdit" id="lockGraph" value="lockGraph">
+                    <label class="selector-right" title="Lock Graph - Clicks Do Nothing" for="lockGraph">&#128274</label>
+                </div>
+            </div>
         </div>
 
         <div id="algorithmsButtons">

@@ -22,6 +22,8 @@ function incrementalVoronoi() {
     // set first state to essentially blank
     let states = []
     let newState = resetNewState(currentStates)
+    newState.codeLines = [1]
+    newState.status = "initialize the list of cells to be empty"
     states.push(newState)
 
     // initialize edgeIDList and cellList
@@ -83,6 +85,8 @@ function incrementalVoronoi() {
             "stroke-opacity": curPoint_curState["stroke-opacity"]
         }
     })
+    newState.codeLines = [2]
+    newState.status = "make a cell for the first point with the edges of the cell being the border of the space"
     states.push(newState)
 
 
@@ -90,7 +94,7 @@ function incrementalVoronoi() {
     pointsList.forEach(curPoint => {
         // create new Cell for point
         newCell = new VoronoiCell(curPoint)
-        console.log("**NEW CELL**", newCell)
+        //console.log("**NEW CELL**", newCell)
 
         // create state for new cell point
         newState = resetNewState(currentStates)
@@ -101,12 +105,14 @@ function incrementalVoronoi() {
             "stroke-width": 3,
             "stroke-opacity": 1
         }))
+        newState.codeLines = [3, 4]
+        newState.status = "start a new cell at the next point (orange point)"
         states.push(newState)
 
         // for every other Cell in list
         let foundCritPoints = []
         cellList.forEach(curCell => {
-            console.log("   **CHECK CELL**", curCell)
+            //console.log("   **CHECK CELL**", curCell)
             handleCellComparison(newCell, curCell, edgeIDList, foundCritPoints, currentStates, states)
         })
 
@@ -126,14 +132,16 @@ function incrementalVoronoi() {
 
     // add last state for displaying sick voronoi diagram
     newState = resetNewState(currentStates)
+    newState.codeLines = [24]
+    newState.status = "Voronoi Diagram is complete!"
     states.push(newState)
 
     // set new states to stateList, update it, add pseudocode, update display
     stateList.states = states
     stateList.curIteration = -1
     stateList.numIterations = states.length
-    //stateList.pseudocode = earClipCode
-    //initPseudocodeText()
+    stateList.pseudocode = incrementalVoronoiCode
+    initPseudocodeText()
     updateDisplay("next")
     console.log("New Incremental Voronoi")
     console.log(states)
@@ -145,9 +153,7 @@ class VoronoiCell {
         this.point = point
         this.edgeIDs = []
     }
-}
-
-// function handle comparing new cell to a current cell
+}// function handle comparing new cell to a current cell
 function handleCellComparison(curCell, checkCell, edgeIDList, foundCritPoints, currentStates, states) {
     // get endpoints of perpendicular bisector
     let perpendicularBisectorPts = getPerpendicularBisectorEndpointsFromPtIDs(curCell.point, checkCell.point)
@@ -161,7 +167,7 @@ function handleCellComparison(curCell, checkCell, edgeIDList, foundCritPoints, c
         "stroke-width": 2,
         "stroke-dasharray": "10, 5"
     }))
-
+   
     // add state and reverse to highlight
     let cellPoint_curState = JSON.parse(currentStates[checkCell.point.attr("id")])
     newState.points.push(createPointStateUpdateFromPt(checkCell.point, currentStates, {
@@ -169,17 +175,17 @@ function handleCellComparison(curCell, checkCell, edgeIDList, foundCritPoints, c
         "stroke-width": 3,
         "stroke-opacity": 1
     }))
-
-    // finish state for highlighting cell point and bisector
+    newState.codeLines = [5, 6]
+    newState.status = "for previous cell (orange highlight), get perpendicular bisector (pb) of this cell and new one (orange dotted line)"
     states.push(newState)
 
     //  get testEdge coordinates & turn from bisector to new cell point
     let turnCurPoint = getPointsTurnFromCoord(perpendicularBisectorPts[0], perpendicularBisectorPts[1], [curCell.point.attr("cx"), curCell.point.attr("cy")])
 
     // for every edge in said cell, check relationship and mark as such
+    newState = resetNewState(currentStates)
     let criticalPoints = []
     let edgeIDsToDelete = []
-    newState = resetNewState(currentStates)
     checkCell.edgeIDs.forEach(testEdgeID => {
         // get intersection point
         let testEdgeCoord = getEdgeCoordFromID(testEdgeID)
@@ -249,7 +255,10 @@ function handleCellComparison(curCell, checkCell, edgeIDList, foundCritPoints, c
             }
         }
     })
+    newState.codeLines = [7, 8, 9, 10, 11, 12, 13]
+    newState.status = "get edges of cell intersecting pb (purple) and edges of cell on the new-cell side of pb (red)"
     states.push(newState)
+
 
     // handle marked relationships
     newState = resetNewState(currentStates)
@@ -464,6 +473,8 @@ function handleCellComparison(curCell, checkCell, edgeIDList, foundCritPoints, c
             }))
         }
     })
+    newState.codeLines = [14, 15, 16, 17, 18, 19, 20, 21, 22]
+    newState.status = "clip intersected edges (split if border), connect intersection points on pb, delete non-border edges found"
     states.push(newState)
 
 
@@ -486,7 +497,32 @@ function handleCellComparison(curCell, checkCell, edgeIDList, foundCritPoints, c
             "stroke-width": 0
         }
     })
-}
+} const incrementalVoronoiCode = [
+    "cellList= list to hold future cells",
+    "make first cell the borders",
+    "for each point:",
+    "  create newCell at point",
+    "  for each checkCell in cellList:",
+    "    get perpendicular bisector (pb)",
+    "    criticalPts= intersection pts",
+    "    closeEdges= edges closer to newCell",
+    "    for each edge in checkCell:",
+    "      if edge intersects pb:",
+    "        save intersection to criticalPts",
+    "      if edge is on new cell side of pb:",
+    "        add edge to closeEdges",
+    "    for each critPt in criticalPoints:",
+    "      clip edge at critPt (split if border)",
+    "    if length(criticalPts) == 2:",
+    "      connect both points",
+    "    for each edge in closeEdges:",
+    "      if edge is a border:",
+    "        make edge part of newCell",
+    "      else:",
+    "        delete edge",
+    "  add new cell to cellList",
+    "voronoi diagram complete!"
+]
 
 // set onClick
 document.querySelector("#incrementalBtn").onclick = incrementalVoronoi

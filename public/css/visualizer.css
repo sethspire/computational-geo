@@ -1,5 +1,5 @@
 :root {
-    --panel-width: 20em;
+    --panel-width: 24em;
 }
 
 
@@ -83,9 +83,12 @@ button > img {
 .selector-right {
     border-radius: 0 2em 2em 0;
 }
+.panel-selector-wrap {
+    display: inline-block;
+}
 .panel-selector {
     display: flex;
-    margin: 0 0.5em 0.5em 0.5em;
+    margin: 0 0 0.5em 1em;
     font-family: Arial, Helvetica, sans-serif;
 }
 .panel-selector input[type="radio"] {
@@ -93,7 +96,7 @@ button > img {
 }      
 .panel-selector label {
     color: #00000041;
-    padding: 4px 11px;
+    padding: 2px 8px;
     font-family: Arial;
     font-size: 1em;
     cursor: pointer;
@@ -106,7 +109,7 @@ button > img {
     color: var(--clr-background-medium);
 }
 #algorithmsButtons {
-    margin: 0 0.5em;
+    margin: 0.5em 0.5em 0 0.5em;
 }
 /* algorithm and psuedocode status*/
 #algorithmStatus {
