@@ -237,9 +237,9 @@ function deleteSegment() {
         let segmentId = hoveredCircle.attr("data-segmentID")
         let pointIDs = segmentId.split("_")
         
-        let startPoint = points.findOne(`[id=${pointIDs[1]}]`)
-        let endPoint = points.findOne(`[id=${pointIDs[2]}]`)
-        let segment = edges.findOne(`[id=${segmentId}]`)
+        let startPoint = points.findOne(`[id='${pointIDs[1]}']`)
+        let endPoint = points.findOne(`[id='${pointIDs[2]}']`)
+        let segment = edges.findOne(`[id='${segmentId}']`)
         
         startPoint.remove()
         endPoint.remove()
@@ -248,9 +248,9 @@ function deleteSegment() {
         let segmentId = hoveredEdge.attr("id")
         let pointIDs = segmentId.split("_")
         
-        let startPoint = points.findOne(`[id=${pointIDs[1]}]`)
-        let endPoint = points.findOne(`[id=${pointIDs[2]}]`)
-        let segment = edges.findOne(`[id=${segmentId}]`)
+        let startPoint = points.findOne(`[id='${pointIDs[1]}']`)
+        let endPoint = points.findOne(`[id='${pointIDs[2]}']`)
+        let segment = edges.findOne(`[id='${segmentId}']`)
         
         startPoint.remove()
         endPoint.remove()
@@ -279,8 +279,8 @@ function addPolygonPoint_simple(event) {
             let prevEdge = edgeList.pop()
             let segmentId = prevEdge.attr("id")
             let segmentPointIDs = segmentId.split("_").slice(1,3)
-            let p2 = points.findOne(`[id=${segmentPointIDs[0]}]`)
-            let q2 = points.findOne(`[id=${segmentPointIDs[1]}]`)
+            let p2 = points.findOne(`[id='${segmentPointIDs[0]}']`)
+            let q2 = points.findOne(`[id='${segmentPointIDs[1]}']`)
             if (doOverlapFromPts(prevPoint, newPoint, p2, q2)) {
                 foundIntersection = true
             }
@@ -288,8 +288,8 @@ function addPolygonPoint_simple(event) {
             edgeList.forEach(edge => {
                 segmentId = edge.attr("id")
                 segmentPointIDs = segmentId.split("_").slice(1,3)
-                p2 = points.findOne(`[id=${segmentPointIDs[0]}]`)
-                q2 = points.findOne(`[id=${segmentPointIDs[1]}]`)
+                p2 = points.findOne(`[id='${segmentPointIDs[0]}']`)
+                q2 = points.findOne(`[id='${segmentPointIDs[1]}']`)
                 foundIntersection = doIntersectFromPts(prevPoint, newPoint, p2, q2) || foundIntersection
             })
         }
@@ -333,7 +333,7 @@ function addPolygonTempLines_simple() {
 
     // show where completing line would be
     if (allPoints.length > 2) {
-        let testLine = temp.findOne("line[id=testLine]")
+        let testLine = temp.findOne("line[id='testLine']")
         if (testLine) {
             testLine.remove()
         }
@@ -349,8 +349,8 @@ function addPolygonTempLines_simple() {
         edgeList.forEach(edge => {
             let segmentId = edge.attr("id")
             let segmentPointIDs = segmentId.split("_").slice(1,3)
-            let p2 = points.findOne(`[id=${segmentPointIDs[0]}]`)
-            let q2 = points.findOne(`[id=${segmentPointIDs[1]}]`)
+            let p2 = points.findOne(`[id='${segmentPointIDs[0]}']`)
+            let q2 = points.findOne(`[id='${segmentPointIDs[1]}']`)
             foundIntersection = doIntersectFromPts(firstPoint, newPoint, p2, q2) || foundIntersection
         })
 
@@ -370,7 +370,7 @@ function addPolygonTempLines_simple() {
     }
 
     // remove old temp line
-    let trackLine = temp.findOne("line[id=trackLine]")
+    let trackLine = temp.findOne("line[id='trackLine']")
     if (trackLine) {
         trackLine.remove()
     }
@@ -389,7 +389,7 @@ function addPolygonTempLines_simple() {
 
     // add event listener moving temp line
     canvas.on('mousemove', function(event) {
-        let trackEdge = temp.findOne("line[id=trackLine]")
+        let trackEdge = temp.findOne("line[id='trackLine']")
         trackEdge.attr({
             "x2": event.offsetX,
             "y2": event.offsetY
@@ -410,10 +410,10 @@ function deletePolygonElement_simple() {
         let prevSegment = null
         let nextSegment = null
         if (segmentID_prev) {
-            prevSegment = edges.findOne(`[id=${segmentID_prev}]`)
+            prevSegment = edges.findOne(`[id='${segmentID_prev}']`)
         }
         if (segmentID_next) {
-            nextSegment = edges.findOne(`[id=${segmentID_next}]`)
+            nextSegment = edges.findOne(`[id='${segmentID_next}']`)
         }
 
         // if have both prev and next, make prev segment go to next point, del next segment and hovered point
@@ -421,10 +421,10 @@ function deletePolygonElement_simple() {
             // get the other points associated with the prev segment and next segment
             let prevPointIDs = segmentID_prev.split("_").slice(1, 3)
             let prevPointID = prevPointIDs[0] === hoveredCircle.attr("id") ? prevPointIDs[1] : prevPointIDs[0]
-            let prevPoint = points.findOne(`[id=${prevPointID}`)
+            let prevPoint = points.findOne(`[id='${prevPointID}']`)
             let nextPointIDs = segmentID_next.split("_").slice(1, 3)
             let nextPointID = nextPointIDs[0] === hoveredCircle.attr("id") ? nextPointIDs[1] : nextPointIDs[0]
-            let nextPoint = points.findOne(`[id=${nextPointID}`)
+            let nextPoint = points.findOne(`[id='${nextPointID}']`)
 
             // check if estimated new line intersects anything
             let foundIntersection = false
@@ -432,8 +432,8 @@ function deletePolygonElement_simple() {
             edgeList.forEach(edge => {
                 let segmentId = edge.attr("id")
                 let segmentPointIDs = segmentId.split("_").slice(1,3)
-                let p2 = points.findOne(`[id=${segmentPointIDs[0]}]`)
-                let q2 = points.findOne(`[id=${segmentPointIDs[1]}]`)
+                let p2 = points.findOne(`[id='${segmentPointIDs[0]}']`)
+                let q2 = points.findOne(`[id='${segmentPointIDs[1]}']`)
                 let intersectionPt = getSegmentIntersectionFromPts(prevPoint, nextPoint, p2, q2)
                 if (intersectionPt && doIntersectFromPts(prevPoint, nextPoint, p2, q2) &&
                     JSON.stringify(intersectionPt) !== JSON.stringify([Number(prevPoint.attr("cx")), Number(prevPoint.attr("cy"))]) && 
@@ -474,7 +474,7 @@ function deletePolygonElement_simple() {
             // get the other points of the prev segment, update it
             let prevPointIDs = segmentID_prev.split("_").slice(1, 3)
             let prevPointID = prevPointIDs[0] === hoveredCircle.attr("id") ? prevPointIDs[1] : prevPointIDs[0]
-            let prevPoint = points.findOne(`[id=${prevPointID}`)
+            let prevPoint = points.findOne(`[id='${prevPointID}']`)
             prevPoint.attr({
                 "data-segmentID_next": null
             })
@@ -486,7 +486,7 @@ function deletePolygonElement_simple() {
             // get the other points of the prev segment, update it
             let nextPointIDs = segmentID_next.split("_").slice(1, 3)
             let nextPointID = nextPointIDs[0] === hoveredCircle.attr("id") ? nextPointIDs[1] : nextPointIDs[0]
-            let nextPoint = points.findOne(`[id=${nextPointID}`)
+            let nextPoint = points.findOne(`[id='${nextPointID}']`)
             nextPoint.attr({
                 "data-segmentID_prev": null
             })

@@ -31,8 +31,8 @@ function earClip() {
         let edge = edgesList[i]
         let segmentId = edge.attr("id")
         let segmentPointIDs = segmentId.split("_").slice(1,3)
-        let p2 = points.findOne(`[id=${segmentPointIDs[0]}]`)
-        let q2 = points.findOne(`[id=${segmentPointIDs[1]}]`)
+        let p2 = points.findOne(`[id='${segmentPointIDs[0]}']`)
+        let q2 = points.findOne(`[id='${segmentPointIDs[1]}']`)
         foundIntersection = doIntersectFromPts(firstPoint, lastPoint, p2, q2) || foundIntersection
     }
     if (foundIntersection) {

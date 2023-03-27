@@ -23,6 +23,10 @@
             <label class="selector-right" title="Lock Graph - Clicks Do Nothing" for="lockGraph">&#128274</label>
         </div>
 
+        <div id="algorithmsButtons">
+            {{> (lookup . 'algorithms')}}
+        </div>
+
         <div id="media-panel">
             <button id="media-to-start" class="panel-btn media-control" title="To Start"><img src="images/media control/to-start.png"></button>
             <button id="media-previous" class="panel-btn media-control" title="Previous State"><img src="images/media control/previous.png"></button>
@@ -30,10 +34,6 @@
             <button id="media-next" class="panel-btn media-control" title="Next State"><img src="images/media control/next.png"></button>
             <button id="media-to-end" class="panel-btn media-control" title="To End"><img src="images/media control/to-end.png"></button>
             <progress id="media-progress" value="-1" max="-1"></progress>
-        </div>
-
-        <div id="algorithmsButtons">
-            {{> (lookup . 'algorithms')}}
         </div>
 
         <div id="algorithmStatus">

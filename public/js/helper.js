@@ -522,12 +522,12 @@ function orientation(p, q, r) {
 function doIntersect(segment1, segment2) {
     let segment1Id = segment1.attr("id")
     let segment1PointIDs = segment1Id.split("_").slice(1,3)
-    let p1 = points.findOne(`[id=${segment1PointIDs[0]}]`)
-    let q1 = points.findOne(`[id=${segment1PointIDs[1]}]`)
+    let p1 = points.findOne(`[id='${segment1PointIDs[0]}']`)
+    let q1 = points.findOne(`[id='${segment1PointIDs[1]}']`)
     let segment2Id = segment2.attr("id")
     let segment2PointIDs = segment2Id.split("_").slice(1,3)
-    let p2 = points.findOne(`[id=${segment2PointIDs[0]}]`)
-    let q2 = points.findOne(`[id=${segment2PointIDs[1]}]`)
+    let p2 = points.findOne(`[id='${segment2PointIDs[0]}']`)
+    let q2 = points.findOne(`[id='${segment2PointIDs[1]}']`)
 
     return doIntersectFromPts(p1, q1, p2, q2)
 }
@@ -564,12 +564,12 @@ function getSegmentsIntersection(segment1, segment2) {
     // get points of segments
     let segment1Id = segment1.attr("id")
     let segment1PointIDs = segment1Id.split("_").slice(1,3)
-    let A = points.findOne(`[id=${segment1PointIDs[0]}]`)
-    let B = points.findOne(`[id=${segment1PointIDs[1]}]`)
+    let A = points.findOne(`[id='${segment1PointIDs[0]}']`)
+    let B = points.findOne(`[id='${segment1PointIDs[1]}']`)
     let segment2Id = segment2.attr("id")
     let segment2PointIDs = segment2Id.split("_").slice(1,3)
-    let C = points.findOne(`[id=${segment2PointIDs[0]}]`)
-    let D = points.findOne(`[id=${segment2PointIDs[1]}]`)
+    let C = points.findOne(`[id='${segment2PointIDs[0]}']`)
+    let D = points.findOne(`[id='${segment2PointIDs[1]}']`)
 
     return getSegmentIntersectionFromPts(A, B, C, D)
 }
@@ -599,6 +599,104 @@ function getSegmentIntersectionFromPts(A, B, C, D) {
         return [x, y];
     }
 }
+
+
+// FUNCTION: get intersection of 2 lines based on endpoints coordinates of 2 segments
+function getSegmentIntersectionFromCoord(A, B, C, D) {
+    if (doIntersectFromCoord(A, B, C, D)) {
+        return getLineIntersectionFromCoord(A, B, C, D)
+    } else {
+        return null
+    }
+}
+
+function getLineIntersectionFromCoord(A, B, C, D) {
+    // Line AB represented as a1x + b1y = c1
+    var a1 = B[1] - A[1];
+    var b1 = A[0] - B[0];
+    var c1 = a1*(A[0]) + b1*(A[1]);
+    
+    // Line CD represented as a2x + b2y = c2
+    var a2 = D[1] - C[1];
+    var b2 = C[0] - D[0];
+    var c2 = a2*(C[0])+ b2*(C[1]);
+    
+    var determinant = a1*b2 - a2*b1;
+    
+    if (determinant == 0) {
+        // The lines are parallel. This is simplified
+        // by returning a pair of FLT_MAX
+        return null;
+    }
+    else {
+        var x = (b2*c1 - b1*c2)/determinant;
+        var y = (a1*c2 - a2*c1)/determinant;
+        return [x, y];
+    }
+}
+
+// FUNCTION: returns true if the points of segments indicate intersection from coordinates
+function doIntersectFromCoord(p1, q1, p2, q2) {
+    // Find the four orientations needed for general and special cases
+    let o1 = orientationFromCoord(p1, q1, p2);
+    let o2 = orientationFromCoord(p1, q1, q2);
+    let o3 = orientationFromCoord(p2, q2, p1);
+    let o4 = orientationFromCoord(p2, q2, q1);
+    
+    // General case
+    if (o1 != o2 && o3 != o4) return true
+
+    // Special Cases
+    // p1, q1 and p2 are collinear and p2 lies on segment p1q1
+    if (o1 == 0 && onSegmentFromCoord(p1, p2, q1)) return true;
+    
+    // p1, q1 and q2 are collinear and q2 lies on segment p1q1
+    if (o2 == 0 && onSegmentFromCoord(p1, q2, q1)) return true;
+    
+    // p2, q2 and p1 are collinear and p1 lies on segment p2q2
+    if (o3 == 0 && onSegmentFromCoord(p2, p1, q2)) return true;
+    
+    // p2, q2 and q1 are collinear and q1 lies on segment p2q2
+    if (o4 == 0 && onSegmentFromCoord(p2, q1, q2)) return true;
+    
+    return false; // Doesn't fall in any of the above cases
+}
+
+// FUNCTION: To find orientation of ordered triplet (p, q, r) based on coordinates
+function orientationFromCoord(p, q, r) {
+    // 0 --> p, q and r are collinear
+    // 1 --> Clockwise
+    // 2 --> Counterclockwise
+    let p_x = p[0]
+    let q_x = q[0]
+    let r_x = r[0]
+    let p_y = p[1]
+    let q_y = q[1]
+    let r_y = r[1]
+
+    let val = (q_y-p_y) * (r_x-q_x) - (q_x-p_x) * (r_y-q_y);
+    
+    if (val == 0) return 0; // collinear
+    
+    return (val > 0)? 1: 2; // clock or counterclock wise
+}
+
+// FUNCTION: Given three collinear points p, q, r, the function checks if point q lies on line segment 'pr' using coordinates
+function onSegmentFromCoord(p, q, r) {
+    let p_x = p[0]
+    let q_x = q[0]
+    let r_x = r[0]
+    let p_y = p[1]
+    let q_y = q[1]
+    let r_y = r[1]
+    if (q_x <= Math.max(p_x, r_x) && q_x >= Math.min(p_x, r_x) &&
+        q_y <= Math.max(p_y, r_y) && q_y >= Math.min(p_y, r_y)) {
+        return true;
+    }
+    
+    return false;
+}
+
 
 //FUNCTION: using endpoints, check if 2 segments overlap outside of single endpoint
 function doOverlapFromPts(A, B, C, D) {
@@ -653,4 +751,168 @@ function getEdgeId(point1, point2) {
     return id
 }
 
-export { PriorityQueue, AVLTree, SegmentStatus, getEdgeId, doIntersect, getSegmentsIntersection, doIntersectFromPts, getSegmentIntersectionFromPts, doOverlapFromPts }
+// use endpoint coordinates to get Edge ID
+function getEdgeIdFromCoord(p1, p2) {
+    let x1 = Number(p1[0])
+    let y1 = Number(p1[1])
+    let x2 = Number(p2[0])
+    let y2 = Number(p2[1])
+    // points ids
+    let point1ID = `p${x1}-${y1}`
+    let point2ID = `p${x2}-${y2}`
+
+    // id is ordered with points left to right (top to bottom tiebreaker)
+    let id = null
+    if (x1 < x2) {
+        id = `e_${point1ID}_${point2ID}`
+    } else if (x1 > x2) {
+        id = `e_${point2ID}_${point1ID}`
+
+    } else {
+        if (y1 < y2) {
+            id = `e_${point1ID}_${point2ID}`
+        } else {
+            id = `e_${point2ID}_${point1ID}`
+        }
+    }
+
+    return id
+}
+
+// get endpoint coordinates from edge ID
+function getEdgeCoordFromID(edgeID) {
+    let pointIDs = edgeID.substring(2).split("_")
+    let p1_coord = pointIDs[0].substring(1).split("-")
+    let x1 = p1_coord[0]
+    let y1 = p1_coord[1]
+    let p2_coord = pointIDs[1].substring(1).split("-")
+    let x2 = p2_coord[0]
+    let y2 = p2_coord[1]
+
+    return [[x1, y1], [x2, y2]]
+}
+
+// get perpendicular bisector of 2 points where p1 and p2 are poin
+function getPerpendicularBisectorFromPtIDs(p1, p2) {
+    // get coordinates
+    let p1_coord = p1.attr("id").substring(1).split("-")
+    let x1 = Number(p1_coord[0])
+    let y1 = Number(p1_coord[1])
+    let p2_coord = p2.attr("id").substring(1).split("-")
+    let x2 = Number(p2_coord[0])
+    let y2 = Number(p2_coord[1])
+
+    // get midpoint
+    let midX = (x1+x2)/2
+    let midY = (y1+y2)/2
+
+    // get slope of line (p1, p2)
+    let slope = (y2-y1)/(x2-x1)
+
+    // get slope and y-intercept of perpendicular bisector
+    let bi_slope = -1/slope
+    let bi_yInt = midY - bi_slope*midX
+
+    return [bi_slope, bi_yInt]
+}
+
+// get perpendicular bisector endpoint
+function getPerpendicularBisectorEndpointsFromPtIDs(p1, p2) {
+    // get coordinates
+    let p1_coord = p1.attr("id").substring(1).split("-")
+    let x1 = Number(p1_coord[0])
+    let y1 = Number(p1_coord[1])
+    let p2_coord = p2.attr("id").substring(1).split("-")
+    let x2 = Number(p2_coord[0])
+    let y2 = Number(p2_coord[1])
+
+    // get midpoint
+    let midX = (x1+x2)/2
+    let midY = (y1+y2)/2
+
+    // get linear equation
+    let lineEq = getPerpendicularBisectorFromPtIDs(p1, p2)
+    let bi_slope = lineEq[0]
+    let bi_yInt = lineEq[1]
+
+    // endpoints type is based on slope
+    if (bi_slope === 0) {
+        // horizontal line
+        return [[0, midY], [window.svg_width, midY]]
+
+    } else if (bi_slope === Infinity || bi_slope === -Infinity) {
+        // vertical line
+        return [[midX, 0], [midX, window.svg_height]]
+    
+    } else {
+        // normal slope
+        let endpoints = []
+
+        let leftInter_y = bi_yInt
+        let rightInter_y = bi_slope*window.svg_width + bi_yInt
+        let topInter_x = (-bi_yInt)/bi_slope
+        let bottomInter_x = (window.svg_height-bi_yInt)/bi_slope
+
+        if (leftInter_y >= 0 && leftInter_y <= window.svg_height) {
+            endpoints.push([0, leftInter_y])
+        }
+        if (rightInter_y >= 0 && rightInter_y <= window.svg_height) {
+            endpoints.push([window.svg_width, rightInter_y])
+        }
+        if (topInter_x > 0 && topInter_x < window.svg_width) {
+            endpoints.push([topInter_x, 0])
+        }
+        if (bottomInter_x > 0 && bottomInter_x < window.svg_width) {
+            endpoints.push([bottomInter_x, window.svg_height])
+        }
+
+        return endpoints
+
+    // } else if (lineEq[0] < 0) {
+    //     // negative slope (since graph is essentially inverted, but would look positive when plotted)
+    //     let endpoints = []
+
+    //     // left point intersects left side or bottom
+    //     let leftIntersection_y = lineEq[1]
+    //     let bottomIntersection_x = (window.svg_height-lineEq[1])/lineEq[0]
+    //     // correct one is positive and within range
+    //     if (leftIntersection_y >= 0 && leftIntersection_y <= window.svg_height) {
+    //         endpoints.push([0, leftIntersection_y])
+    //     } else if (bottomIntersection_x >= 0 && bottomIntersection_x <= window.svg_width) {
+    //         endpoints.push([bottomIntersection_x, window.svg_height])
+    //     }
+
+    //     // right point intersections
+    }
+}
+
+// get the turn between 3 points based on coordinates
+function getPointsTurnFromCoord(p1, p2, p3) {
+    let x1 = p1[0]
+    let y1 = p1[1]
+    let x2 = p2[0]
+    let y2 = p2[1]
+    let x3 = p3[0]
+    let y3 = p3[1]
+
+    return ((x2 - x1)*((-1)*y3 - (-1)*y1)) - (((-1)*y2 - (-1)*y1)*(x3 - x1))
+}
+
+// barely extend a line segment's endpoint by a certain amount
+function barelyExtendEndpointsFromCoord(endpoints, amount) {
+    let x1 = Number(endpoints[0][0])
+    let y1 = Number(endpoints[0][1])
+    let x2 = Number(endpoints[1][0])
+    let y2 = Number(endpoints[1][1])
+
+    let totalLength = Math.sqrt(Math.pow(x1 - x2, 2.0) + Math.pow(y1 - y2, 2.0))
+
+    let new_x1 = x1 + (x1-x2)/totalLength*amount
+    let new_y1 = y1 + (y1-y2)/totalLength*amount
+    let new_x2 = x2 + (x2-x1)/totalLength*amount
+    let new_y2 = y2 + (y2-y1)/totalLength*amount
+
+    return [[new_x1, new_y1], [new_x2, new_y2]]
+}
+
+export { PriorityQueue, AVLTree, SegmentStatus, getEdgeId, doIntersect, getSegmentsIntersection, doIntersectFromPts, getSegmentIntersectionFromPts, doOverlapFromPts, getEdgeIdFromCoord, getPerpendicularBisectorFromPtIDs, getPerpendicularBisectorEndpointsFromPtIDs, getPointsTurnFromCoord, getSegmentIntersectionFromCoord, getEdgeCoordFromID, barelyExtendEndpointsFromCoord }

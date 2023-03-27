@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+
+<head>
+    {{>head}}
+     <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0/dist/svg.min.js"></script>
+     <script defer type="module" src="/js/voronoiDiagram.js"></script>
+</head>
+
+<body>
+    {{>navbar}}
+
+    <main>
+        {{>panel_general algorithms="voronoi_diagram_algs"}}
+        <div id="graph-area"></div>
+    </main>
+</body>

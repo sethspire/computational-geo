@@ -1,4 +1,5 @@
 import { updateDisplay } from "/js/visualizer.js"
+import { getEdgeIdFromCoord } from "/js/helper.js"
 
 let stateList = null
 let reverseStates = null
@@ -33,6 +34,9 @@ function resetNewState(currentStates) {
         reverseStates["edgesFromPts"].forEach(edgeReset => {
             newState.edges.push(createEdgeStateUpdatesFromPts(edgeReset["p1"], edgeReset["p2"], edgeReset["movement"], currentStates, edgeReset["attr"]))
         })
+        reverseStates["edgesFromCoord"].forEach(edgeReset => {
+            newState.edges.push(createEdgeStateUpdatesFromCoord(edgeReset["p1_coord"], edgeReset["p2_coord"], edgeReset["movement"], currentStates, edgeReset["attr"]))
+        })
         reverseStates["polygonsFromID"].forEach(polygonReset => {
             newState.polygons.push(createPolygonStateUpdateFromPoints(polygonReset["points"], polygonReset["polygonID"], currentStates, polygonReset["attr"]))
         })
@@ -50,6 +54,7 @@ function resetReverseStates() {
         "pointsFromCoord": [],
         "edgesFromEdge": [],
         "edgesFromPts": [],
+        "edgesFromCoord": [],
         "polygonsFromID": []
     }
 }
@@ -71,8 +76,10 @@ function createPointStateUpdateFromPt(point, currentStates, nextAttr) {
 
 // FUNCTION: using coordinates, create pointUpdate JSON, get current State of point, update attributes, form new current state
 function createPointStateUpdateFromCoord(coordinates, currentStates, nextAttr) {
-    let x = Math.round(coordinates[0])
-    let y = Math.round(coordinates[1])
+    // let x = Math.round(coordinates[0])
+    // let y = Math.round(coordinates[1])
+    let x = coordinates[0]
+    let y = coordinates[1]
     let id = `p${x}-${y}`
 
     let foundPoint = currentStates[id]
@@ -216,6 +223,111 @@ function createEdgeStateUpdatesFromPts(point1, point2, movement, currentStates, 
     }
 }
 
+// FUNCTION: using edge, create edgeUpdate JSON, get current State of edge if exists, update attributes, form new current state
+function createEdgeStateUpdatesFromEdge(edge, currentStates, nextAttr) {
+    if (edge) {
+        // edge id
+        let id = edge.attr("id")
+
+        // edge does already exist
+        let edgeUpdate = {
+            "id": id, 
+            "prev": JSON.parse(currentStates[id]),
+            "next": JSON.parse(currentStates[id])
+        }
+        for (const [key, value] of Object.entries(nextAttr)) {
+            edgeUpdate.next[key] = value
+        }
+        currentStates[id] = JSON.stringify(edgeUpdate.next)
+
+        return edgeUpdate
+    } else{
+        console.log("help")
+    }
+}
+
+// FUNCTION: using points, create edgeUpdate JSON, get current State of edge if exists, update attributes, form new current state
+function createEdgeStateUpdatesFromCoord(p1_coord, p2_coord, movement, currentStates, nextAttr) {
+    // get coordinates for each point
+    let x1 = p1_coord[0]
+    let y1 = p1_coord[1]
+    let x2 = p2_coord[0]
+    let y2 = p2_coord[1]
+
+    // id is ordered with points left to right (top to bottom tiebreaker)
+    let id = getEdgeIdFromCoord([x1, y1], [x2, y2])
+
+    // search for edge, base form on that
+    let edge = currentStates[id]
+    if (edge) {
+        // edge does already exist
+        let edgeUpdate = {
+            "id": id, 
+            "prev": JSON.parse(currentStates[id]),
+            "next": JSON.parse(currentStates[id])
+        }
+        for (const [key, value] of Object.entries(nextAttr)) {
+            edgeUpdate.next[key] = value
+        }
+        if (movement === "extend") {
+            edgeUpdate.next["x2"] = JSON.parse(edgeUpdate.prev["data-extended-state"])["x2"]
+            edgeUpdate.next["y2"] = JSON.parse(edgeUpdate.prev["data-extended-state"])["y2"]
+        } else if (movement === "retract") {
+            edgeUpdate.next["x2"] = JSON.parse(edgeUpdate.prev["data-extended-state"])["x1"]
+            edgeUpdate.next["y2"] = JSON.parse(edgeUpdate.prev["data-extended-state"])["y1"]
+        }
+        currentStates[id] = JSON.stringify(edgeUpdate.next)
+
+        return edgeUpdate
+    } else {
+        // edge does NOT already exist
+        let edgeUpdate = {
+            "id": id, 
+            "prev": {
+                "x1": x1,
+                "y1": y1,
+                "x2": x1,
+                "y2": y1,
+                "stroke": "",
+                "stroke-dasharray": ""
+            },
+            "next": {
+                "x1": x1,
+                "y1": y1,
+                "x2": x2,
+                "y2": y2,
+                "stroke": "black",
+                "stroke-dasharray": ""
+            }
+        }
+        for (const [key, value] of Object.entries(nextAttr)) {
+            edgeUpdate.next[key] = value
+        }
+        if (movement === "extend") {
+            edgeUpdate.next["x2"] = x2,
+            edgeUpdate.next["y2"] = y2
+        } else if (movement === "retract") {
+            edgeUpdate.next["x2"] = x1,
+            edgeUpdate.next["y2"] = y1
+        }
+
+        // store extended/retracted info
+        if (movement === "retract" || movement === "extend") {
+            let edgeExtendedState = JSON.stringify(edgeUpdate.next)
+            let edgeRetractedState = JSON.stringify(edgeUpdate.prev)
+            edgeUpdate.prev["data-extended-state"] = edgeExtendedState
+            edgeUpdate.prev["data-retracted-state"] = edgeRetractedState
+            edgeUpdate.next["data-extended-state"] = edgeExtendedState
+            edgeUpdate.next["data-retracted-state"] = edgeRetractedState
+        }
+
+        // store current state
+        currentStates[id] = JSON.stringify(edgeUpdate.next)
+
+        return edgeUpdate
+    }
+}
+
 // FUNCTION: using a point, create edgeUpdate JSON, get current State of edge if exists, update attributes, form new current state
 function createVerticalEdgeStateUpdatesFromX(x_val, currentStates, nextAttr) {
     // id is ordered with points left to right (top to bottom tiebreaker)
@@ -269,29 +381,6 @@ function createVerticalEdgeStateUpdatesFromX(x_val, currentStates, nextAttr) {
         currentStates[id] = JSON.stringify(edgeUpdate.next)
 
         return edgeUpdate
-    }
-}
-
-// FUNCTION: using edge, create edgeUpdate JSON, get current State of edge if exists, update attributes, form new current state
-function createEdgeStateUpdatesFromEdge(edge, currentStates, nextAttr) {
-    if (edge) {
-        // edge id
-        let id = edge.attr("id")
-
-        // edge does already exist
-        let edgeUpdate = {
-            "id": id, 
-            "prev": JSON.parse(currentStates[id]),
-            "next": JSON.parse(currentStates[id])
-        }
-        for (const [key, value] of Object.entries(nextAttr)) {
-            edgeUpdate.next[key] = value
-        }
-        currentStates[id] = JSON.stringify(edgeUpdate.next)
-
-        return edgeUpdate
-    } else{
-        console.log("help")
     }
 }
 
@@ -350,4 +439,4 @@ function createPolygonStateUpdateFromPoints(points, polygonID, currentStates, ne
     }
 }
 
-export { stateList, reverseStates, initStateList, resetNewState, resetReverseStates, createPointStateUpdateFromPt, createEdgeStateUpdatesFromPts, createVerticalEdgeStateUpdatesFromX, createEdgeStateUpdatesFromEdge, createPointStateUpdateFromCoord, createPolygonStateUpdateFromPoints }
+export { stateList, reverseStates, initStateList, resetNewState, resetReverseStates, createPointStateUpdateFromPt, createEdgeStateUpdatesFromPts, createVerticalEdgeStateUpdatesFromX, createEdgeStateUpdatesFromEdge, createEdgeStateUpdatesFromCoord, createPointStateUpdateFromCoord, createPolygonStateUpdateFromPoints }

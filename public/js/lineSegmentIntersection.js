@@ -44,22 +44,32 @@ function lineSweep() {
     states.push(newState)
 
     // place all endpoints in a priority queue
-    let eventQueue = new PriorityQueue((a, b) => a["sortVal"] < b["sortVal"])
+    let eventQueue = new PriorityQueue((a, b) => {
+        if (a["sortVal"] < b["sortVal"]) {
+            return true
+        } else if (a["sortVal"] === b["sortVal"] && a["sortVal2"] < b["sortVal2"]) {
+            return true
+        } else {
+            return false
+        }
+    })
     edgesList.each(edge => {
         let segmentId = edge.attr("id")
         let pointIDs = segmentId.split("_").slice(1,3)
         
-        let startPoint = points.findOne(`[id=${pointIDs[0]}]`)
-        let endPoint = points.findOne(`[id=${pointIDs[1]}]`)
+        let startPoint = points.findOne(`[id='${pointIDs[0]}']`)
+        let endPoint = points.findOne(`[id='${pointIDs[1]}']`)
 
         eventQueue.push({
             "point": startPoint,
-            "sortVal": Number(startPoint.attr("cx")) + Number(startPoint.attr("cy"))/svg_height,
+            "sortVal": Number(startPoint.attr("cx")),
+            "sortVal2": Number(startPoint.attr("cy")),
             "eventType": "left"
         })
         eventQueue.push({
             "point": endPoint,
-            "sortVal": Number(endPoint.attr("cx")) + Number(endPoint.attr("cy"))/svg_height,
+            "sortVal": Number(endPoint.attr("cx")),
+            "sortVal2": Number(endPoint.attr("cy")),
             "eventType": "right"
         })
     })
@@ -112,11 +122,14 @@ function lineSweep() {
             window.sweepY = pointLoc[1]
 
             // get point ID
-            let x = Math.round(pointLoc[0])
-            let y = Math.round(pointLoc[1])
+            // let x = Math.round(pointLoc[0])
+            // let y = Math.round(pointLoc[1])
+            let x = pointLoc[0]
+            let y = pointLoc[1]
             let pointID = `p${x}-${y}`
 
             // create update for point with reverse state
+            console.log(pointID, currentStates)
             let ptCurState = JSON.parse(currentStates[pointID])
             newState.points.push(createPointStateUpdateFromCoord(pointLoc, currentStates, {
                 "fill": "red"
@@ -140,7 +153,7 @@ function lineSweep() {
         if (event["eventType"] === "left") {
             console.log("LEFT EVENT")
             // add segment to sweepStatus
-            let segment = edges.findOne(`[id=${point.attr("data-segmentID")}]`)
+            let segment = edges.findOne(`[id='${point.attr("data-segmentID")}']`)
             let segmentStatus = new SegmentStatus(segment)
             sweepStatus.insertNode(segmentStatus)
             newState.edges.push(createEdgeStateUpdatesFromEdge(segment, currentStates, {
@@ -170,7 +183,7 @@ function lineSweep() {
         } else if (event["eventType"] === "right") {
             console.log("RIGHT EVENT")
             // add segment to sweepStatus
-            let segment = edges.findOne(`[id=${point.attr("data-segmentID")}]`)
+            let segment = edges.findOne(`[id='${point.attr("data-segmentID")}']`)
             let segmentStatus = new SegmentStatus(segment)
             newState.edges.push(createEdgeStateUpdatesFromEdge(segment, currentStates, {
                 "stroke": "black",
@@ -266,8 +279,8 @@ function lineSweepEndpoints() {
         let segmentId = edge.attr("id")
         let pointIDs = segmentId.split("_").slice(1,3)
         
-        let startPoint = points.findOne(`[id=${pointIDs[0]}]`)
-        let endPoint = points.findOne(`[id=${pointIDs[1]}]`)
+        let startPoint = points.findOne(`[id='${pointIDs[0]}']`)
+        let endPoint = points.findOne(`[id='${pointIDs[1]}']`)
 
         let lPoint = {
             "point": startPoint,
@@ -379,7 +392,9 @@ function checkIntersection(segment1, segment2, currentStates, states, eventQueue
 
             eventQueue.push({
                 "pointLoc": intersectionLoc,
-                "sortVal": Math.round(intersectionLoc[0]) + Math.round(intersectionLoc[1])/svg_height,
+                //"sortVal": Math.round(intersectionLoc[0]) + Math.round(intersectionLoc[1])/svg_height,
+                "sortVal": intersectionLoc[0],
+                "sortVal2": intersectionLoc[1],
                 "eventType": "intersection",
                 "segments": [seg1Status, seg2Status]
             })
@@ -457,7 +472,3 @@ const checkTypes = {
 // set onClick
 document.querySelector("#lineSweepBtn").onclick = lineSweep
 // document.querySelector("#lineSweepEndpointsBtn").onclick = lineSweepEndpoints
-
-// TODO
-// - in left event:
-//      If there is an event associated with this pair, remove it from the event queue
