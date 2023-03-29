@@ -898,13 +898,17 @@ function getPointsTurnFromCoord(p1, p2, p3) {
 
 // barely extend a line segment's endpoint by a certain amount
 function barelyExtendEndpointsFromCoord(endpoints, amount) {
+    // ensure endpoints are numbers not strings
     let x1 = Number(endpoints[0][0])
     let y1 = Number(endpoints[0][1])
     let x2 = Number(endpoints[1][0])
     let y2 = Number(endpoints[1][1])
 
+    // got total length of the line segment
     let totalLength = Math.sqrt(Math.pow(x1 - x2, 2.0) + Math.pow(y1 - y2, 2.0))
 
+    // extended value added
+    // i.e. for x1 take the ratio of distance between x values to the total length. multiple this by amount to extend
     let new_x1 = x1 + (x1-x2)/totalLength*amount
     let new_y1 = y1 + (y1-y2)/totalLength*amount
     let new_x2 = x2 + (x2-x1)/totalLength*amount

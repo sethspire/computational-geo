@@ -14,4 +14,28 @@
         {{>panel_general algorithms="convex_hull_algs"}}
         <div id="graph-area"></div>
     </main>
+
+    <script defer>
+        const addTabHeadArea = document.getElementById("tab-heads-area")
+        const addTabBodyArea = document.getElementById("tab-bodies-area")
+        const addTitleArea = document.getElementById("page-title")
+
+        addTitleArea.innerHTML = "CONVEX HULL"
+
+        addTabHeadArea.innerHTML += `
+            <h6 id='tab02' class='tabs text-muted'>Convex Hull</h6>
+        `
+
+        addTabBodyArea.innerHTML += `
+            <fieldset id="tab02_" class="tab-body">
+                <p>The convex hull problem is to take a list of points and output the smallest and simplest polygon that contains every points on the plane. It is like if one were to wrap a rubber band around the points.</p>
+                <br>
+
+                <h5>Graham Scan</h5>
+                <p>The web app currently implements the Graham Scan algorithm. It works counter-clockwise from the leftmost point and iteratively adds points. If the angle of the last 3 points added is not convex (does not point outward), it remove middle of those 3 points to alleviate that issue (red points and lines).</p> 
+                    
+                <p>A key part of developing this algorithm was implementing helper functions used in ordering points counter-clockwise and to check the angle of 3 points. The ordering part is done by sorting based on the polar angle between the left point and each point using the <i>arctan2</i> function: <i>atan2(y2-y1, x2-x1)</i>. Finding if an angle is convex uses the coordinates of all 3 points where if the result is positive then the 3rd point turns to the left relative to the 1st, meaning it is convex in this use case where points are being added in a counter-clockwise manner: <i>((x2-x1)*(y3-y1)) - ((y2-y1)*(x3-x1))</i>.</p>
+            </fieldset>
+        `
+    </script>
 </body>

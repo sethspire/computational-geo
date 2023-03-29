@@ -14,4 +14,28 @@
         {{>panel_general algorithms="voronoi_diagram_algs"}}
         <div id="graph-area"></div>
     </main>
+
+    <script defer>
+        const addTabHeadArea = document.getElementById("tab-heads-area")
+        const addTabBodyArea = document.getElementById("tab-bodies-area")
+        const addTitleArea = document.getElementById("page-title")
+
+        addTitleArea.innerHTML = "VORONOI DIAGRAMS"
+
+        addTabHeadArea.innerHTML += `
+            <h6 id='tab02' class='tabs text-muted'>Voronoi Diagram</h6>
+        `
+
+        addTabBodyArea.innerHTML += `
+            <fieldset id="tab02_" class="tab-body">
+                <p>The Voronoi diagram problem is to take a list of points and subdivide the entire plane into sections (cells) for each point where the entire area of that section is closer to its corresponding point than any other. This has been used in city planning to check which area makes up each school zone.</p>
+                <br>
+
+                <h5>Incremental Voronoi</h5>
+                <p>The Incremental algorithm that has been implemented involves iterating over the points and adding them to the diagram one at a time. When a point is added to the diagram (orange point), it is compared to all other current points (blue point with orange highlight). The perpendicular bisector (line that runs in the middle of 2 points at a right angle to the line segment made by those 2 points) of the new point and each other on the diagram is calculated. The perpendicular bisectors divide area into which point it is closest to. When a line segments associated with the cell being checked is intersected by the perpendicular bisector (purple lines and points) then that segment can be cut to the side matching the cell being checked. The points of intersection can be connected to form the barrier segment between the new cell and cell being checked. On the other hand, if a segment is not intersected by falls entirely on the side of the new cell (red segments), then it can be removed (unless it is part of the border in which case it joins the new cell).</p>
+
+                <p>Checking if two segments intersect involves solving the system of the two linear equations for those segments and making sure the returned point falls in the range of both segments. Checking what side of the perpendicular bisector a segment falls on is done by finding the turn from the endpoint of the perpendicular bisector and the segment endpoints and the new point added to the diagram using the following formula (which was also used to test if a point is convex in other algorithms on this site): <i>((x2-x1)*(y3-y1)) - ((y2-y1)*(x3-x1))</i>. If the signs of all the turns calculated match, then the new point and the segment are on the same side of the perpendicular bisector.</p>
+            </fieldset>
+        `
+    </script>
 </body>

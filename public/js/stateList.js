@@ -14,7 +14,7 @@ function initStateList() {
         "pseudocode": null
     }
     updateDisplay()
-    document.querySelector("#pseudocode").innerHTML = null
+    document.querySelector("#codeArea").innerHTML = null
 }
 
 // FUNCTION: reset newState and include any resets needed

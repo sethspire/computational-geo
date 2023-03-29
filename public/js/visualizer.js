@@ -104,7 +104,7 @@ function updateProgressBar(curIter, numIter) {
 }
 
 function initPseudocodeText() {
-    let pseudocodeArea = document.querySelector("#pseudocode")
+    let pseudocodeArea = document.querySelector("#codeArea")
     stateList.pseudocode.forEach((code, i) => {
         let text = code.replaceAll(" ", "&nbsp")
         let newLine = document.createElement("p")
@@ -116,7 +116,7 @@ function initPseudocodeText() {
 
 function updateCodeLines(lineNumbers=[], status="") {
     // remove classes from children
-    let pseudocodeArea = document.querySelector("#pseudocode")
+    let pseudocodeArea = document.querySelector("#codeArea")
     pseudocodeArea.children.forEach(child => {
         child.setAttribute("class", "")
     })

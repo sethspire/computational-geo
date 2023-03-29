@@ -683,7 +683,7 @@ function resetStates(removeTemp=true) {
 
     // re-initialize state list
     initStateList()
-    document.querySelector("#pseudocode").innerHTML = null
+    document.querySelector("#codeArea").innerHTML = null
     document.querySelector("#codeStatus").innerHTML = null
 }
 

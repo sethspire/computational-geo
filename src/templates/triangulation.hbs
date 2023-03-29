@@ -14,4 +14,30 @@
         {{>panel_general algorithms="triangulation_algs"}}
         <div id="graph-area"></div>
     </main>
+
+    <script defer>
+        const addTabHeadArea = document.getElementById("tab-heads-area")
+        const addTabBodyArea = document.getElementById("tab-bodies-area")
+        const addTitleArea = document.getElementById("page-title")
+
+        addTitleArea.innerHTML = "TRIANGULATION"
+
+        addTabHeadArea.innerHTML += `
+            <h6 id='tab02' class='tabs text-muted'>Triangulation</h6>
+        `
+
+        addTabBodyArea.innerHTML += `
+            <fieldset id="tab02_" class="tab-body">
+                <p>The problem of triangulation is to take a polygon and subdivide it into a group of triangles (the blue areas separated by blue lines on the visualization). This process is the basis of other algorithms that require a larger polygon to be broken down. For example, calculating the area of any polygon can be done by summing the areas of each triangle that makes it up.</p>
+                <br>
+
+                <h5>Ear Clipping</h5>
+                <p>The ear clipping algorithm is currently implemented. It finds which points are convex (angle points outward) and have no other points fall in the triangle formed by said point and its two neighbors (green dot and the green triangle in the visualization). If both of those things are true, then it is an 'ear tip' that can be removed (clipped) successfully without issue. The algorithm iteratively clips off one ear at a time and updates the 2 neighbors to check if they are ear tips or not till complete.</p>
+                    
+                <p>This uses the same function as Graham Scan to check if a point is convex: if <i>((x2-x1)*(y3-y1)) - ((y2-y1)*(x3-x1))</i> is positive then the angle is convex. Checking if a point (<i>P</i>) falls within the triangle formed by 3 different points (<i>A</i>, <i>B</i>, and <i>C</i>) uses a cool geometric fact. First, the area of the triangle <i>ABC</i> is calculated. Then, the area of the triangles formed by <i>P</i> and 2 of the triangle points (<i>PBC</i>, <i>APC</i>, and <i>ABP</i>) are calculated. If the sum of areas of <i>PBC</i>, <i>APC</i>, and <i>ABP</i> equals the area of <i>ABC</i> then the point is in the triangle.</p>
+                
+                <p>To make the algorithm more efficient, when checking if a convex point is an ear tip, only the concave points (red points) need to be checked to see if they fall within the triangle since if at least 1 point is in the triangle, one of them must be a concave point.</p>
+            </fieldset>
+        `
+    </script>
 </body>

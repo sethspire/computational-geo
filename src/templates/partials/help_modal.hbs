@@ -2,31 +2,92 @@
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Quick Help Guide</h5>
+            <div class="modal-header row d-flex justify-content-between mx-1 mx-sm-3 mb-0 pb-0 border-0">
+                <div id="tab-heads-area" class="row d-flex justify-content-between mx-1 mx-sm-3 mb-0 pb-0 border-0">
+                    <h6 id="tab01" class="tabs active font-weight-bold">Quick Help Guide</h6>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <p>Welcome! This page serves to give you the ability to interact with some algorithms in the field of computational geometry.</p>
-                <p>NOTE: THIS WAS DEVELOPED FOR LARGER HORIZONTAL SCREENS, BUT ROTATING YOUR MOBILE DEVICE SHOULD ALLOW FOR RELATIVELY SIMPLE USAGE.</p>
-                <br>
-                <p>In the panel to left are buttons to allow you to interact with the visualization. The first 3 buttons allow you to RESIZE the white SVG canvas to fit the available screen area, to CLEAR all of the current elements on the canvas, and to make the window FULL screen.</p>
-                <p>To add elements, simply click or tap on the large white area. Depending on the problem and algorithm, a tap may add a single point, the endpoint of a line segment, or a new point on a polygon.</p>
-                <p>The 3-way toggle on the upper left next to FULL allows you to decide if a click ADDS an element to the canvas, DELETES an element from the canvas, or LOCKS the canvas so a click does nothing.</p>
-                <p>The QUESTION MARK will reopen this help guide when pressed.</p>
-                <br>
-                <p>In the second row of buttons on the panel are the algorithm(s) to solve the problem at hand. Clicking the button will run the algorithm and save the state of the visualization throughout.</p>
-                <p>The media control buttons then allow for the running of the visualization to be toggled. The 5 buttons allow the user to SKIP TO BEGINNING, to GO TO PREVIOUS, to PLAY/PAUSE, to GO TO NEXT, and to SKIP TO END. The progress bar below that shows how far into the algorithm the visualization is.</p>
-                <br>
-                <p>When an algorithm is run, the pseudocode will populate below in the panel. It essentially shows the general steps of the algorithm without getting into to many specific details of how the algorithm is implemented. As the visualization goes, it will highlight the matching lines of pseudocode for each step in the visualization. In the green area above the pseudocode will be a line of text giving a greater description of that step in the algorithm.</p>
+            <div class="line"></div>
+            <div class="modal-body" id="tab-bodies-area">
+                <fieldset id="tab01_" class="tab-body showTab">
+                    <p>Welcome! This page serves to give you the ability to interact with some algorithms in the field of computational geometry.</p>
+                    <p><b>NOTE: THIS WAS DEVELOPED FOR LARGER HORIZONTAL SCREENS, BUT ROTATING YOUR MOBILE DEVICE SHOULD ALLOW FOR RELATIVELY SIMPLE USAGE.</b></p>
+                    <br>
+                    <p>In the panel to left are buttons to allow you to interact with the visualization. The first 3 buttons allow you to <b>RESIZE</b> the white SVG canvas to fit the available screen area, to <b>CLEAR</b> all of the current elements on the canvas, and to make the window <b>FULL</b> screen.</p>
+                    <p>To add elements, simply click or tap on the large white area. Depending on the problem and algorithm, a tap may add a single point, the endpoint of a line segment, or a new point on a polygon.</p>
+                    <p>The 3-way toggle on the upper left next to <b>FULL</b> allows you to decide if a click <b>ADDS</b> an element to the canvas, <b>DELETES</b> an element from the canvas, or <b>LOCKS</b> the canvas so a click does nothing.</p>
+                    <p>The <b>QUESTION MARK</b> will reopen this help guide when pressed.</p>
+                    <br>
+                    <p>In the second row of buttons on the panel are the algorithm(s) to solve the problem at hand. Clicking the button will run the algorithm and save the state of the visualization throughout.</p>
+                    <p>The media control buttons then allow for the running of the visualization to be toggled. The 5 buttons allow the user to <b>SKIP TO BEGINNING</b>, to <b>GO TO PREVIOUS</b>, to <b>PLAY/PAUSE</b>, to <b>GO TO NEXT</b>, and to <b>SKIP TO END</b>. The progress bar below that shows how far into the algorithm the visualization is.</p>
+                    <br>
+                    <p>When an algorithm is run, the pseudocode will populate below in the panel. It essentially shows the general steps of the algorithm without getting into to many specific details of how the algorithm is implemented. As the visualization goes, it will highlight the matching lines of pseudocode for each step in the visualization. In the green area above the pseudocode will be a line of text giving a greater description of that step in the algorithm.</p>
+                </fieldset>
             </div>
         </div>
     </div>
 </div>
 
 <script defer>
-    var myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
-        keyboard: false
+    window.addEventListener("load", (event) => {
+        var myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {
+            keyboard: false
+        })
+        myModal.show()
+
+        let allTabs = document.querySelectorAll('.tabs')
+        allTabs.forEach(tab => {
+            tab.addEventListener('click', function handleClick(event) {
+                let tabs = document.querySelectorAll('.tabs')
+                tabs.forEach(checkTab => {
+                    checkTab.classList.remove("active")
+                    checkTab.classList.remove("font-weight-bold")
+                    checkTab.classList.add("text-muted")
+                })
+                event.srcElement.classList.remove("text-muted")
+                event.srcElement.classList.add("font-weight-bold")
+                event.srcElement.classList.add("active")
+
+                let activeID = event.srcElement.id
+                let tabBodies = document.querySelectorAll('.tab-body')
+                tabBodies.forEach(checkTabBody => {
+                    checkTabBody.classList.remove("showTab")
+                })
+                document.getElementById(`${activeID}_`).classList.add("showTab")
+            })
+        })
     })
-    myModal.show()
 </script>
+
+<style>
+    .line {
+        background-color: #CFD8DC;
+        height: 1px;
+        width: 100%;
+    }
+    fieldset.tab-body {
+        display: none;
+    }
+    fieldset.tab-body.showTab {
+        display: block;
+    }
+    .tabs {
+        margin: 2px 5px 0px 5px;
+        padding-bottom: 10px;
+        padding-top: 5px;
+        cursor: pointer;
+        width: fit-content;
+        border-radius: 0.5em 0.5em 0 0;
+    }
+    .tabs:hover, .tabs.active {
+        border-bottom: 2px solid var(--clr-background-dark);
+    }
+    .tabs.active {
+        background-color: var(--clr-background-medium);
+    }
+    .row {
+        width: auto;
+        align-items: baseline;
+    }
+</style>

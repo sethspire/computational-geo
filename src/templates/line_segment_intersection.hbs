@@ -14,4 +14,30 @@
         {{>panel_general algorithms="line_segment_intersection_algs"}}
         <div id="graph-area"></div>
     </main>
+
+    <script defer>
+        const addTabHeadArea = document.getElementById("tab-heads-area")
+        const addTabBodyArea = document.getElementById("tab-bodies-area")
+        const addTitleArea = document.getElementById("page-title")
+
+        addTitleArea.innerHTML = "LINE SEGMENT INTERSECTION"
+
+        addTabHeadArea.innerHTML += `
+            <h6 id='tab02' class='tabs text-muted'>Segment Intersection</h6>
+        `
+
+        addTabBodyArea.innerHTML += `
+            <fieldset id="tab02_" class="tab-body">
+                <p>The line segment intersection problem is simply to take in a list of line segments and return a list of all the intersection points (blue dots below). This general idea of finding line segment intersections is at the heart of collision detection for video games and some forms of autopilot.</p> 
+                <br>
+
+                <h5>Line Sweep</h5>
+                <p>The algorithm currently implemented is known as a line sweep algorithm. It can be thought of as sliding a vertical line (red dashed line in the visualization) left to right where it tracks which lines segments cross it, ordered top to bottom (orange and purple lines). Then, only the segments on that list that are newly made neighbors need to be checked for intersection (the purple lines). Unless two segments--at some point--cross the sweep line at the same time and are next to each other in the order list top to bottom, the two segments cannot intersect</p> 
+                    
+                </p>Checking if two segments intersect involves solving the system of the two linear equations for those segments and making sure the returned point falls in the range of both segments. Maintaining the list of points where the sweep line stops at to update required the development of a specialized priority queue. A priority queue was chosen over a regular sorted list because the intersection points are dynamically added to it when they are found by the algorithm.</p>
+                
+                <p>The data of which line segments are active on the sweep line is stored in a AVL binary search tree implemented for storing these segments. Since the value sorting the segments is the y-value where it crosses the sweep line, the comparator used in the AVL tree is dynamic: it is a function run which returns that value every time a comparison to said segment is needed.</p> 
+            </fieldset>
+        `
+    </script>
 </body>
